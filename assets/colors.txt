@@ -1,0 +1,5 @@
+Acento/primario D7BDF6
+Secundario F6F3BD
+Color Woblip C1F6BD
+Blanco F1EDE7 
+Negro 2E2E2E
