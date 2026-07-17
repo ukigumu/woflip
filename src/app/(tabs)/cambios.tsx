@@ -1,6 +1,5 @@
-import { BottomSheet, Column, Host, List, ListItem, Text as UIText } from '@expo/ui';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { SwapRequestWizard } from '@/components/swap-request-wizard';
 import { Body, Caption, Heading, Title } from '@/components/ui/app-text';
@@ -8,10 +7,10 @@ import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
 import { Screen } from '@/components/ui/screen';
 import { Segmented } from '@/components/ui/segmented';
+import { Sheet } from '@/components/ui/sheet';
 import { Palette } from '@/constants/palette';
 import { Fonts } from '@/constants/theme';
 import { useStoreVersion } from '@/hooks/use-store';
-import { useTabFocused } from '@/hooks/use-tab-focused';
 import { useTheme } from '@/hooks/use-theme';
 import { addDaysISO, formatDayShort, todayISO } from '@/lib/dates';
 import { effectiveIntervals, formatIntervals } from '@/lib/hours';
@@ -57,7 +56,6 @@ export default function CambiosScreen() {
 
 function OffersTab() {
   const [choosing, setChoosing] = useState(false);
-  const focused = useTabFocused();
   const colors = useTheme();
   const me = getMe();
   const typesById = getShiftTypesById();
@@ -91,7 +89,6 @@ function OffersTab() {
             <HardCard
               key={o.id}
               shadowOffset={4}
-              rotate={mine ? -1 : 0}
               color={mine ? colors.backgroundSelected : undefined}
               contentStyle={{ padding: 14, gap: 8 }}>
               <Body style={{ fontFamily: Fonts.bodyBold }}>
@@ -123,36 +120,37 @@ function OffersTab() {
         })
       )}
 
-      {/* Selector de turno propio a ofrecer (sheet nativo @expo/ui) */}
-      {focused ? (
-        <Host matchContents>
-          <BottomSheet isPresented={choosing} onDismiss={() => setChoosing(false)}>
-            <Column spacing={10} style={{ padding: 20 }}>
-              <UIText textStyle={{ fontSize: 18, fontWeight: '700' }}>¿Qué turno ofreces?</UIText>
-              {myShifts.length === 0 ? (
-                <UIText textStyle={{ fontSize: 14, color: colors.textSecondary }}>
-                  No tienes turnos próximos que ofrecer.
-                </UIText>
-              ) : (
-                <List>
-                  {myShifts.map((a) => (
-                    <ListItem
-                      key={a.id}
-                      onPress={() => {
-                        createOffer(a.id);
-                        setChoosing(false);
-                      }}>
-                      <UIText textStyle={{ fontWeight: '600' }}>
-                        {`${formatDayShort(a.date)} · ${typesById[a.shiftTypeId]?.label ?? ''} (${formatIntervals(effectiveIntervals(a, typesById))})`}
-                      </UIText>
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </Column>
-          </BottomSheet>
-        </Host>
-      ) : null}
+      {/* Selector de turno propio a ofrecer */}
+      <Sheet visible={choosing} onDismiss={() => setChoosing(false)}>
+        <Heading>¿Qué turno ofreces?</Heading>
+        {myShifts.length === 0 ? (
+          <Caption color="secondary">No tienes turnos próximos que ofrecer.</Caption>
+        ) : (
+          <HardCard shadowOffset={4} contentStyle={{ paddingVertical: 2 }}>
+            {myShifts.map((a, i) => (
+              <Pressable
+                key={a.id}
+                onPress={() => {
+                  createOffer(a.id);
+                  setChoosing(false);
+                }}
+                style={({ pressed }) => [
+                  {
+                    paddingHorizontal: 14,
+                    paddingVertical: 12,
+                    borderTopWidth: i === 0 ? 0 : 1,
+                    borderTopColor: colors.backgroundElement,
+                  },
+                  pressed && { backgroundColor: colors.backgroundElement },
+                ]}>
+                <Body style={{ fontFamily: Fonts.bodyMedium }}>
+                  {`${formatDayShort(a.date)} · ${typesById[a.shiftTypeId]?.label ?? ''} (${formatIntervals(effectiveIntervals(a, typesById))})`}
+                </Body>
+              </Pressable>
+            ))}
+          </HardCard>
+        )}
+      </Sheet>
     </View>
   );
 }
@@ -280,7 +278,7 @@ function ResultCard({
   if (result.status === 'accepted' && result.acceptedByMemberId) {
     // Identidad revelada SOLO tras aceptar.
     return (
-      <HardCard color={Palette.mint} rotate={-1.5} contentStyle={{ padding: 16, gap: 8 }}>
+      <HardCard color={Palette.mint} contentStyle={{ padding: 16, gap: 8 }}>
         <Title style={{ color: '#2E2E2E' }}>
           {`¡${memberNames[result.acceptedByMemberId] ?? 'Alguien'} ha aceptado! 🎉`}
         </Title>

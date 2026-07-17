@@ -47,9 +47,10 @@ export function DayRow({
     if (prevTypeId.current !== shiftType?.id) {
       prevTypeId.current = shiftType?.id;
       if (shiftType) {
+        // Pop sutil: 2% arriba y vuelta con un toque de muelle.
         scale.value = withSequence(
-          withTiming(1.05, { duration: 90 }),
-          withSpring(1, { damping: 14 }),
+          withTiming(1.02, { duration: 60 }),
+          withSpring(1, { duration: 280, dampingRatio: 0.75 }),
         );
       }
     }
@@ -127,16 +128,16 @@ const styles = StyleSheet.create({
     borderRadius: Radii.pill,
     paddingHorizontal: 6,
     paddingVertical: 1,
-    transform: [{ rotate: '-3deg' }],
   },
   todayBadgeText: { fontSize: 9, fontFamily: Fonts.display, color: '#2E2E2E', letterSpacing: 0.5 },
+  // Altura FIJA e igual en todas las variantes (trabajo, libre, vacío):
+  // sin ella, pasar de dos líneas a una hace saltar el alto de la fila.
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingVertical: 9,
     paddingHorizontal: 12,
-    minHeight: 52,
+    height: 56,
   },
   codeBadge: {
     width: 30,
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     borderWidth: BorderWidth,
     borderStyle: 'dashed',
     borderRadius: Radii.inner,
-    minHeight: 52,
+    height: 56 + 4, // mismo alto visual que una HardCard (cara + sombra)
     alignItems: 'center',
     justifyContent: 'center',
     // Compensa el padding de sombra de las HardCard vecinas para alinear anchos.

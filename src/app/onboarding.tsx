@@ -1,13 +1,15 @@
-import { Host } from '@expo/ui';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ShiftTypeEditorSheet } from '@/components/shift-type-editor-sheet';
-import { Body, Caption, Heading } from '@/components/ui/app-text';
+import { Body, Caption, Heading, Hero } from '@/components/ui/app-text';
 import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
+import { ShiftPalette } from '@/constants/palette';
 import { BorderWidth, Fonts, Spacing } from '@/constants/theme';
 import { useStoreVersion } from '@/hooks/use-store';
 import { useTheme } from '@/hooks/use-theme';
@@ -34,24 +36,20 @@ export default function OnboardingScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
       <View style={{ flex: 1, padding: Spacing.four, gap: Spacing.three }}>
-        {/* Marca como sticker rotado */}
-        <HardCard
-          color={colors.accent}
-          rotate={-2}
-          shadowOffset={4}
-          style={{ alignSelf: 'flex-start' }}
-          contentStyle={{ paddingHorizontal: 14, paddingVertical: 6 }}>
-          <Text style={{ fontSize: 26, fontFamily: Fonts.display, color: '#2E2E2E' }}>
-            woflip
-          </Text>
-        </HardCard>
+        <Image
+          source={require('../../assets/woflip-logo.svg')}
+          contentFit="contain"
+          style={{ width: 132, height: 44 }}
+        />
 
-        <Heading>Tus turnos-tipo</Heading>
+        <Hero>Tus turnos, sin líos</Hero>
+        <MiniWeek />
         <Caption color="secondary">
           Meter tu semana costará un tap por día: cada tap pasa de un turno al siguiente. Ajusta
           las horas si lo necesitas — o sigue directamente.
         </Caption>
 
+        <Heading>Tus turnos-tipo</Heading>
         <HardCard shadowOffset={4} contentStyle={{ paddingVertical: 2 }}>
           {shiftTypes.map((st, i) => (
             <Pressable
@@ -99,9 +97,41 @@ export default function OnboardingScreen() {
         <PillButton variant="primary" label="Empezar" onPress={start} />
       </View>
 
-      <Host matchContents>
-        <ShiftTypeEditorSheet shiftType={editing} onDismiss={() => setEditing(null)} />
-      </Host>
+      <ShiftTypeEditorSheet shiftType={editing} onDismiss={() => setEditing(null)} />
     </SafeAreaView>
+  );
+}
+
+/**
+ * Semana de juguete, puramente decorativa: 7 mini-pegatinas con el patrón
+ * M M T T P L L que entran en cascada. Enseña el producto antes de
+ * explicarlo (como los mini-planners de la web de Woblip).
+ */
+const TOY_WEEK = ['M', 'M', 'T', 'T', 'P', 'L', 'L'] as const;
+
+function MiniWeek() {
+  const colors = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', gap: 6, paddingVertical: 4 }}>
+      {TOY_WEEK.map((code, i) => (
+        <Animated.View
+          key={i}
+          entering={FadeInDown.delay(50 + i * 40).springify(300).dampingRatio(0.8)}
+          style={{
+            width: 40,
+            height: 44,
+            borderRadius: 10,
+            borderWidth: BorderWidth,
+            borderColor: colors.border,
+            backgroundColor: ShiftPalette[code].bg,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Text style={{ fontSize: 15, fontFamily: Fonts.display, color: '#2E2E2E' }}>
+            {code}
+          </Text>
+        </Animated.View>
+      ))}
+    </View>
   );
 }

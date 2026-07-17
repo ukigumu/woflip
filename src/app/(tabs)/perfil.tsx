@@ -40,7 +40,7 @@ export default function PerfilScreen() {
       <Title>Perfil</Title>
 
       {/* Horas del mes: la utilidad con N=1 (sin grupo también sirve) */}
-      <HardCard color={colors.accent} rotate={-1} contentStyle={{ padding: 16, gap: 2 }}>
+      <HardCard color={colors.accent} contentStyle={{ padding: 16, gap: 2 }}>
         <Text style={{ fontSize: 13, fontFamily: Fonts.bodyBold, color: '#2E2E2E' }}>
           Este mes llevas
         </Text>
@@ -113,11 +113,7 @@ export default function PerfilScreen() {
 
       <PillButton variant="danger" label="Restablecer datos de demo" onPress={resetDemoData} />
 
-      {focused ? (
-        <Host matchContents>
-          <ShiftTypeEditorSheet shiftType={editing} onDismiss={() => setEditing(null)} />
-        </Host>
-      ) : null}
+      <ShiftTypeEditorSheet shiftType={editing} onDismiss={() => setEditing(null)} />
     </Screen>
   );
 }

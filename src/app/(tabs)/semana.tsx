@@ -1,6 +1,7 @@
-import { Host } from '@expo/ui';
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayEditorSheet } from '@/components/day-editor-sheet';
@@ -10,7 +11,6 @@ import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
 import { BottomTabInset, Fonts, Spacing } from '@/constants/theme';
 import { useStoreVersion } from '@/hooks/use-store';
-import { useTabFocused } from '@/hooks/use-tab-focused';
 import { useTheme } from '@/hooks/use-theme';
 import { useWeek } from '@/hooks/use-week';
 import { addDaysISO, formatWeekRange, todayISO, weekDates } from '@/lib/dates';
@@ -33,7 +33,6 @@ import type { Assignment } from '@/lib/types';
  */
 export default function SemanaScreen() {
   useStoreVersion();
-  const focused = useTabFocused();
   const colors = useTheme();
   const { monday, isCurrentWeek, prevWeek, nextWeek, goToCurrentWeek } = useWeek();
   const [editing, setEditing] = useState<Assignment | null>(null);
@@ -45,6 +44,7 @@ export default function SemanaScreen() {
   const today = todayISO();
   const days = weekDates(monday);
   const hours = weekHours(getAssignments(me.id, monday, addDaysISO(monday, 6)), typesById, monday);
+  const daysFilled = days.filter((d) => getAssignment(me.id, d)).length;
 
   /** Tap: pasa al siguiente turno-tipo por sortOrder; tras el último, vacía. */
   function cycleDay(date: string) {
@@ -77,6 +77,15 @@ export default function SemanaScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
+      {/* Marca */}
+      <View style={{ paddingHorizontal: Spacing.three, paddingTop: Spacing.one }}>
+        <Image
+          source={require('../../../assets/woflip-logo.svg')}
+          contentFit="contain"
+          style={{ width: 90, height: 30 }}
+        />
+      </View>
+
       {/* Cabecera: navegación de semanas (tap en el título = volver a hoy) */}
       <View
         style={{
@@ -102,21 +111,24 @@ export default function SemanaScreen() {
         <PillButton size="sm" label="›" onPress={() => changeWeek(nextWeek)} />
       </View>
 
-      {/* Los 7 días */}
+      {/* Los 7 días (entran en cascada) */}
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: Spacing.three }}>
-        {days.map((date) => (
-          <DayRow
+        {days.map((date, i) => (
+          <Animated.View
             key={date}
-            date={date}
-            assignment={getAssignment(me.id, date)}
-            shiftTypesById={typesById}
-            isToday={date === today}
-            onCycle={() => {
-              setFeedback(null);
-              cycleDay(date);
-            }}
-            onEditHours={() => onEditHours(date)}
-          />
+            entering={FadeInDown.delay(i * 28).springify(300).dampingRatio(0.8)}>
+            <DayRow
+              date={date}
+              assignment={getAssignment(me.id, date)}
+              shiftTypesById={typesById}
+              isToday={date === today}
+              onCycle={() => {
+                setFeedback(null);
+                cycleDay(date);
+              }}
+              onEditHours={() => onEditHours(date)}
+            />
+          </Animated.View>
         ))}
         <View style={{ height: Spacing.two }} />
       </ScrollView>
@@ -144,7 +156,7 @@ export default function SemanaScreen() {
           }}>
           <View>
             <Text style={{ fontSize: 11, fontFamily: Fonts.bodyMedium, color: colors.textSecondary }}>
-              total semana
+              {`total semana · ${daysFilled}/7 días`}
             </Text>
             <Text style={{ fontSize: 24, fontFamily: Fonts.display, color: colors.text }}>
               {`${hours} h`}
@@ -154,12 +166,7 @@ export default function SemanaScreen() {
         </HardCard>
       </View>
 
-      {/* Sheet nativo de horas exactas (@expo/ui necesita un Host montado) */}
-      {focused ? (
-        <Host matchContents>
-          <DayEditorSheet assignment={editing} onDismiss={() => setEditing(null)} />
-        </Host>
-      ) : null}
+      <DayEditorSheet assignment={editing} onDismiss={() => setEditing(null)} />
     </SafeAreaView>
   );
 }

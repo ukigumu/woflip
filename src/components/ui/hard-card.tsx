@@ -9,8 +9,6 @@ interface Props {
   color?: string;
   /** Desplazamiento de la sombra dura (px, sin blur). */
   shadowOffset?: number;
-  /** Rotación en grados para efecto "pegatina" (ej. -1.5). */
-  rotate?: number;
   radius?: number;
   onPress?: () => void;
   onLongPress?: () => void;
@@ -27,7 +25,6 @@ export function HardCard({
   children,
   color,
   shadowOffset = 5,
-  rotate = 0,
   radius = Radii.card,
   onPress,
   onLongPress,
@@ -43,18 +40,15 @@ export function HardCard({
       borderColor: colors.border,
       borderRadius: radius,
       backgroundColor: color ?? colors.surface,
+      // Recorta los fondos de los hijos (p. ej. filas en pressed) al radio.
+      overflow: 'hidden',
     },
     pressed && { transform: [{ translateX: o - 1 }, { translateY: o - 1 }] },
     contentStyle,
   ];
 
   return (
-    <View
-      style={[
-        { paddingRight: o, paddingBottom: o },
-        rotate !== 0 && { transform: [{ rotate: `${rotate}deg` }] },
-        style,
-      ]}>
+    <View style={[{ paddingRight: o, paddingBottom: o }, style]}>
       <View
         style={{
           position: 'absolute',

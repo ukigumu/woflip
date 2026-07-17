@@ -219,7 +219,7 @@ function ResultStep({
 
   return (
     <View style={{ gap: 12 }}>
-      <HardCard color={colors.accent} rotate={-1} contentStyle={{ padding: 16, gap: 2 }}>
+      <HardCard color={colors.accent} contentStyle={{ padding: 16, gap: 2 }}>
         <Text style={{ fontSize: 32, fontFamily: Fonts.display, color: '#2E2E2E' }}>
           {`${count} ${count === 1 ? 'compañero' : 'compañeros'}`}
         </Text>

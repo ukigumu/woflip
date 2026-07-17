@@ -5,8 +5,6 @@
  * flipa a mint en sus cards oscuras).
  */
 
-import { Platform } from 'react-native';
-
 import { Palette } from './palette';
 
 export { Palette, ShiftPalette } from './palette';
@@ -91,5 +89,6 @@ export const Radii = {
 /** Grosor de borde firma del estilo (como la web: 1.5px ink). */
 export const BorderWidth = 1.5;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+/** Hueco inferior que dejan las pantallas para la tab bar flotante propia. */
+export const BottomTabInset = 96;
 export const MaxContentWidth = 800;

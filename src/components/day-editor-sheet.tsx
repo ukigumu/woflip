@@ -1,15 +1,10 @@
-import {
-  BottomSheet,
-  Button,
-  Column,
-  Row,
-  Spacer,
-  Text,
-  TextInput,
-  useNativeState,
-} from '@expo/ui';
 import { useState } from 'react';
+import { View } from 'react-native';
 
+import { Body, Caption, Heading } from '@/components/ui/app-text';
+import { Field } from '@/components/ui/field';
+import { PillButton } from '@/components/ui/pill-button';
+import { Sheet } from '@/components/ui/sheet';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDayLong } from '@/lib/dates';
 import { effectiveIntervals } from '@/lib/hours';
@@ -24,14 +19,14 @@ interface Props {
   onDismiss: () => void;
 }
 
-/** BottomSheet del long-press: horas exactas de un día concreto (override). */
+/** Sheet del long-press: horas exactas de un día concreto (override). */
 export function DayEditorSheet({ assignment, onDismiss }: Props) {
   return (
-    <BottomSheet isPresented={assignment !== null} onDismiss={onDismiss}>
+    <Sheet visible={assignment !== null} onDismiss={onDismiss}>
       {assignment ? (
         <EditorBody key={assignment.id} assignment={assignment} onDone={onDismiss} />
       ) : null}
-    </BottomSheet>
+    </Sheet>
   );
 }
 
@@ -57,61 +52,46 @@ function EditorBody({ assignment, onDone }: { assignment: Assignment; onDone: ()
   }
 
   return (
-    <Column spacing={16} style={{ padding: 20 }}>
-      <Text textStyle={{ fontSize: 18, fontWeight: '700' }}>
-        {`${shiftType?.label ?? ''} · ${formatDayLong(assignment.date)}`}
-      </Text>
-      <Text textStyle={{ fontSize: 13, color: colors.textSecondary }}>
+    <View style={{ gap: 14 }}>
+      <Heading>{`${shiftType?.label ?? ''} · ${formatDayLong(assignment.date)}`}</Heading>
+      <Caption color="secondary">
         Cambia las horas solo de este día. El turno-tipo no se toca.
-      </Text>
+      </Caption>
 
       {intervals.map((iv, i) => (
-        <IntervalRow
-          key={`${assignment.id}-${i}`}
-          interval={iv}
-          onChange={(next) => setIntervals((prev) => prev.map((p, j) => (j === i ? next : p)))}
-        />
+        <View key={`${assignment.id}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Field
+            value={iv.start}
+            onChangeText={(t) =>
+              setIntervals((prev) => prev.map((p, j) => (j === i ? { ...p, start: t } : p)))
+            }
+            placeholder="08:00"
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={{ flex: 1 }}
+          />
+          <Body>–</Body>
+          <Field
+            value={iv.end}
+            onChangeText={(t) =>
+              setIntervals((prev) => prev.map((p, j) => (j === i ? { ...p, end: t } : p)))
+            }
+            placeholder="16:00"
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={{ flex: 1 }}
+          />
+        </View>
       ))}
 
-      {error ? <Text textStyle={{ color: colors.danger, fontSize: 13 }}>{error}</Text> : null}
+      {error ? <Caption color={colors.danger}>{error}</Caption> : null}
 
-      <Row spacing={12}>
-        <Button variant="text" label="Horas del tipo" onPress={resetToType} />
-        <Spacer />
-        <Button variant="text" label="Cancelar" onPress={onDone} />
-        <Button variant="filled" label="Guardar" onPress={save} />
-      </Row>
-    </Column>
-  );
-}
-
-function IntervalRow({
-  interval,
-  onChange,
-}: {
-  interval: Interval;
-  onChange: (next: Interval) => void;
-}) {
-  const start = useNativeState(interval.start);
-  const end = useNativeState(interval.end);
-
-  return (
-    <Row spacing={10}>
-      <TextInput
-        value={start}
-        onChangeText={(t) => onChange({ ...interval, start: t })}
-        placeholder="08:00"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      <Text>–</Text>
-      <TextInput
-        value={end}
-        onChangeText={(t) => onChange({ ...interval, end: t })}
-        placeholder="16:00"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-    </Row>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <PillButton size="sm" label="Horas del tipo" onPress={resetToType} />
+        <View style={{ flex: 1 }} />
+        <PillButton size="sm" label="Cancelar" onPress={onDone} />
+        <PillButton variant="primary" size="sm" label="Guardar" onPress={save} />
+      </View>
+    </View>
   );
 }
