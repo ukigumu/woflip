@@ -16,13 +16,7 @@
 
 import { addDaysISO, diffDays } from './dates';
 import { effectiveIntervals, timeToMinutes } from './hours';
-import type {
-  Assignment,
-  Interval,
-  ISODate,
-  ShiftType,
-  SwapRequestMode,
-} from './types';
+import type { Assignment, Interval, ISODate, ShiftType, SwapRequestMode } from './types';
 
 export const MIN_REST_MINUTES = 720; // 12 h entre jornadas
 export const MAX_CONSECUTIVE_WORK_DAYS = 6;
@@ -206,7 +200,7 @@ export function findSwapCandidates(input: MatchInput): CandidateScenario[] {
 
   // Estructurales: mi turno debe ser de trabajo, futuro y no estar comprometido.
   const myType = typesById[requesterAssignment.shiftTypeId];
-  if (!myType || myType.kind !== 'work') return [];
+  if (myType?.kind !== 'work') return [];
   if (myDate <= today) return [];
   if (busy.has(requesterAssignment.id)) return [];
 

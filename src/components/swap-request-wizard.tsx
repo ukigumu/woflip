@@ -1,3 +1,5 @@
+import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Pressable, Text, View } from 'react-native';
 
 import { Body, Caption, Heading } from '@/components/ui/app-text';
@@ -99,7 +101,7 @@ export function SwapRequestWizard({ onSent }: { onSent: () => void }) {
             />
           </HardCard>
           <View style={{ flexDirection: 'row' }}>
-            <PillButton size="sm" label="‹ Atrás" onPress={() => setStep(1)} />
+            <PillButton size="sm" icon="arrow-left" label="Atrás" onPress={() => setStep(1)} />
           </View>
         </View>
       ) : null}
@@ -173,7 +175,12 @@ function RowItem({
         <Body style={{ fontFamily: Fonts.bodyMedium }}>{title}</Body>
         {subtitle ? <Caption color="secondary">{subtitle}</Caption> : null}
       </View>
-      <Text style={{ fontSize: 18, color: colors.textSecondary }}>›</Text>
+      <HugeiconsIcon
+        icon={ArrowRight01Icon}
+        size={14}
+        color={colors.textSecondary}
+        strokeWidth={2}
+      />
     </Pressable>
   );
 }
@@ -211,7 +218,7 @@ function ResultStep({
           seguidos). Prueba con otro turno u otra opción — o anima al grupo a meter su semana.
         </Caption>
         <View style={{ flexDirection: 'row' }}>
-          <PillButton size="sm" label="‹ Probar otra opción" onPress={onBack} />
+          <PillButton size="sm" icon="arrow-left" label="Probar otra opción" onPress={onBack} />
         </View>
       </View>
     );
@@ -228,8 +235,7 @@ function ResultStep({
         </Text>
       </HardCard>
       <Caption color="secondary">
-        No verás quiénes son: la propuesta es ciega y su identidad solo se revela si alguien
-        acepta.
+        No verás quiénes son: la propuesta es ciega y su identidad solo se revela si alguien acepta.
       </Caption>
       <HardCard shadowOffset={4} contentStyle={{ padding: 14, gap: 4 }}>
         <Caption style={{ fontFamily: Fonts.bodyBold }}>Tu parte del cambio</Caption>
@@ -246,7 +252,7 @@ function ResultStep({
         </Caption>
       ) : null}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <PillButton size="sm" label="‹ Atrás" onPress={onBack} />
+        <PillButton size="sm" icon="arrow-left" label="Atrás" onPress={onBack} />
         <PillButton variant="primary" label="Enviar propuesta ciega" onPress={send} />
       </View>
     </View>

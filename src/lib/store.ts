@@ -110,14 +110,15 @@ export function initStore(): void {
   const storedSettings = readJSON<Settings>(KEY.settings);
   state = {
     // requestsWeekOf puede faltar en datos v1 antiguos: el reset perezoso lo normaliza.
-    settings: storedSettings
-      ? { ...defaultSettings(), ...storedSettings }
-      : defaultSettings(),
+    settings: storedSettings ? { ...defaultSettings(), ...storedSettings } : defaultSettings(),
     shiftTypes: readJSON<ShiftType[]>(KEY.shiftTypes) ?? defaultShiftTypes(),
     members,
     group: readJSON<Group>(KEY.group) ?? buildSeedGroup(),
     assignmentsByMember: Object.fromEntries(
-      members.map((m) => [m.id, readJSON<Record<ISODate, Assignment>>(KEY.assignments(m.id)) ?? {}]),
+      members.map((m) => [
+        m.id,
+        readJSON<Record<ISODate, Assignment>>(KEY.assignments(m.id)) ?? {},
+      ]),
     ),
     offers: readJSON<SwapOffer[]>(KEY.offers) ?? [],
     requests: readJSON<SwapRequest[]>(KEY.requests) ?? [],
@@ -278,7 +279,11 @@ export function setDayShift(memberId: string, date: ISODate, shiftTypeId: string
 }
 
 /** Horas exactas de ESE día (long-press). null restablece las del tipo. */
-export function setDayOverride(memberId: string, date: ISODate, intervals: Interval[] | null): void {
+export function setDayOverride(
+  memberId: string,
+  date: ISODate,
+  intervals: Interval[] | null,
+): void {
   const s = requireState();
   const existing = s.assignmentsByMember[memberId]?.[date];
   if (!existing) return;
@@ -348,7 +353,7 @@ export function createOffer(assignmentId: string, note?: string): SwapOffer {
 export function takeOffer(offerId: string, byMemberId: string): void {
   const s = requireState();
   const offer = s.offers.find((o) => o.id === offerId);
-  if (!offer || offer.status !== 'open') return;
+  if (offer?.status !== 'open') return;
   const restType = s.shiftTypes.find((t) => t.kind === 'rest');
   const given = s.assignmentsByMember[offer.fromMemberId]?.[offer.date];
   if (given) {
@@ -449,7 +454,7 @@ export function createRequest(assignmentId: string, mode: SwapRequest['mode']): 
 export function simulateResponse(requestId: string): SwapRequest | undefined {
   const s = requireState();
   const req = s.requests.find((r) => r.id === requestId);
-  if (!req || req.status !== 'pending') return req;
+  if (req?.status !== 'pending') return req;
 
   const scenarios = computeCandidates(req.assignmentId, req.mode, { excludeRequestId: req.id });
   const chosen = scenarios.find((c) => req.candidateMemberIds.includes(c.memberId)) ?? scenarios[0];
@@ -489,7 +494,7 @@ export function cancelRequest(requestId: string): void {
 export function applyAcceptedSwap(requestId: string): void {
   const s = requireState();
   const req = s.requests.find((r) => r.id === requestId);
-  if (!req || req.status !== 'accepted' || !req.acceptedByMemberId) return;
+  if (req?.status !== 'accepted' || !req.acceptedByMemberId) return;
   const me = req.fromMemberId;
   const them = req.acceptedByMemberId;
   const [, myDate] = splitAssignmentId(req.assignmentId);

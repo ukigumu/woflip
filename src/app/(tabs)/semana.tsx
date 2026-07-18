@@ -1,3 +1,5 @@
+import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -95,20 +97,40 @@ export default function SemanaScreen() {
           paddingHorizontal: Spacing.three,
           paddingVertical: Spacing.two,
         }}>
-        <PillButton size="sm" label="‹" onPress={() => changeWeek(prevWeek)} />
+        <PillButton
+          size="sm"
+          icon="arrow-left"
+          accessibilityLabel="Semana anterior"
+          onPress={() => changeWeek(prevWeek)}
+        />
         <Pressable onPress={() => changeWeek(goToCurrentWeek)} style={{ alignItems: 'center' }}>
           <Title>{formatWeekRange(monday)}</Title>
           {!isCurrentWeek ? (
-            <Text style={{ fontSize: 11, fontFamily: Fonts.bodyMedium, color: colors.accentDeep }}>
-              ← volver a esta semana
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+              <HugeiconsIcon
+                icon={ArrowLeft02Icon}
+                size={12}
+                color={colors.accentDeep}
+                strokeWidth={3}
+              />
+              <Text
+                style={{ fontSize: 11, fontFamily: Fonts.bodyMedium, color: colors.accentDeep }}>
+                volver a esta semana
+              </Text>
+            </View>
           ) : (
-            <Text style={{ fontSize: 11, fontFamily: Fonts.bodyMedium, color: colors.textSecondary }}>
+            <Text
+              style={{ fontSize: 11, fontFamily: Fonts.bodyMedium, color: colors.textSecondary }}>
               esta semana
             </Text>
           )}
         </Pressable>
-        <PillButton size="sm" label="›" onPress={() => changeWeek(nextWeek)} />
+        <PillButton
+          size="sm"
+          icon="arrow-right"
+          accessibilityLabel="Semana siguiente"
+          onPress={() => changeWeek(nextWeek)}
+        />
       </View>
 
       {/* Los 7 días (entran en cascada) */}
@@ -116,7 +138,9 @@ export default function SemanaScreen() {
         {days.map((date, i) => (
           <Animated.View
             key={date}
-            entering={FadeInDown.delay(i * 28).springify(300).dampingRatio(0.8)}>
+            entering={FadeInDown.delay(i * 28)
+              .springify(300)
+              .dampingRatio(0.8)}>
             <DayRow
               date={date}
               assignment={getAssignment(me.id, date)}
@@ -155,7 +179,8 @@ export default function SemanaScreen() {
             paddingHorizontal: 14,
           }}>
           <View>
-            <Text style={{ fontSize: 11, fontFamily: Fonts.bodyMedium, color: colors.textSecondary }}>
+            <Text
+              style={{ fontSize: 11, fontFamily: Fonts.bodyMedium, color: colors.textSecondary }}>
               {`total semana · ${daysFilled}/7 días`}
             </Text>
             <Text style={{ fontSize: 24, fontFamily: Fonts.display, color: colors.text }}>

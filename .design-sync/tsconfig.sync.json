@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/assets/*": ["assets/*"],
+      "react-native": ["node_modules/react-native-web/dist/index.js"],
+      "@hugeicons/react-native": [".design-sync/shims/hugeicons.js"],
+      "react-native-reanimated": [".design-sync/shims/reanimated.js"],
+      "expo-image": [".design-sync/shims/expo-image.js"],
+      "react-native-safe-area-context": [".design-sync/shims/safe-area-context.js"]
+    }
+  }
+}

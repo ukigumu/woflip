@@ -28,7 +28,9 @@ export function buildTodayView(
   typesById: Record<string, ShiftType>,
   today: ISODate,
 ): TodayView {
-  const byMember = new Map(todayAssignments.filter((a) => a.date === today).map((a) => [a.memberId, a]));
+  const byMember = new Map(
+    todayAssignments.filter((a) => a.date === today).map((a) => [a.memberId, a]),
+  );
   const working: TodayEntry[] = [];
   const resting: TodayEntry[] = [];
   let unknownCount = 0;

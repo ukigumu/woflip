@@ -1,5 +1,6 @@
+import { Settings02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -25,7 +26,11 @@ import {
   listRequests,
 } from '@/lib/store';
 
-const enter = (i: number) => FadeInDown.springify().damping(18).stiffness(180).delay(i * 60);
+const enter = (i: number) =>
+  FadeInDown.springify()
+    .damping(18)
+    .stiffness(180)
+    .delay(i * 60);
 
 /** Perfil: quién soy, mis horas y mis stats. Turnos-tipo y ajustes en /ajustes. */
 export default function PerfilScreen() {
@@ -72,12 +77,7 @@ export default function PerfilScreen() {
           onPress={() => router.push('/ajustes')}
           hitSlop={8}
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
-          <SymbolView
-            name="gearshape"
-            size={26}
-            tintColor={colors.text}
-            fallback={<Text style={{ fontSize: 22, color: colors.text }}>⚙︎</Text>}
-          />
+          <HugeiconsIcon icon={Settings02Icon} size={26} color={colors.text} strokeWidth={1.8} />
         </Pressable>
       </Animated.View>
 

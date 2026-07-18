@@ -1,4 +1,6 @@
 import { Host, Switch } from '@expo/ui';
+import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
@@ -106,7 +108,15 @@ export default function AjustesScreen() {
                   {st.kind === 'rest' ? 'Día libre' : formatIntervals(st.intervals)}
                 </Caption>
               </View>
-              <Caption color="secondary">Editar ›</Caption>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                <Caption color="secondary">Editar</Caption>
+                <HugeiconsIcon
+                  icon={ArrowRight01Icon}
+                  size={10}
+                  color={colors.textSecondary}
+                  strokeWidth={2}
+                />
+              </View>
             </Pressable>
           ))}
         </HardCard>
@@ -122,8 +132,7 @@ export default function AjustesScreen() {
           />
         </Host>
         <Caption color="secondary">
-          Apagado, el grupo solo ve si trabajas o libras cada día. Es tu decisión, no la del
-          grupo.
+          Apagado, el grupo solo ve si trabajas o libras cada día. Es tu decisión, no la del grupo.
         </Caption>
       </View>
 

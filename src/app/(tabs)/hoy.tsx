@@ -1,9 +1,10 @@
+import { ArrowRight01Icon, Exchange01Icon, UserGroupIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { Body, Caption, Heading, Title } from '@/components/ui/app-text';
+import { Body, Caption, Heading, Hero, Title } from '@/components/ui/app-text';
 import { Avatar } from '@/components/ui/avatar';
 import { HardCard } from '@/components/ui/hard-card';
 import { Screen } from '@/components/ui/screen';
@@ -11,8 +12,15 @@ import { Palette } from '@/constants/palette';
 import { BorderWidth, Fonts, Radii } from '@/constants/theme';
 import { useStoreVersion } from '@/hooks/use-store';
 import { useTheme } from '@/hooks/use-theme';
-import { addDaysISO, formatDayLong, formatDayShort, mondayOf, todayISO, weekDates } from '@/lib/dates';
-import { effectiveIntervals, formatIntervals, weekHours } from '@/lib/hours';
+import {
+  addDaysISO,
+  formatDayLong,
+  formatDayShort,
+  mondayOf,
+  todayISO,
+  weekDates,
+} from '@/lib/dates';
+import { effectiveIntervals, formatIntervals, intervalsTotalMinutes } from '@/lib/hours';
 import {
   getAllAssignments,
   getAssignment,
@@ -39,17 +47,7 @@ export default function InicioScreen() {
   const assignment = getAssignment(me.id, today);
   const shift = assignment ? typesById[assignment.shiftTypeId] : undefined;
   const days = weekDates(monday);
-  const team = buildTodayView(
-    getMembers(),
-    getAllAssignments(today, today),
-    typesById,
-    today,
-  );
-  const hours = weekHours(
-    getAssignments(me.id, monday, addDaysISO(monday, 6)),
-    typesById,
-    monday,
-  );
+  const team = buildTodayView(getMembers(), getAllAssignments(today, today), typesById, today);
   const openOffers = listOffers().filter((offer) => offer.status === 'open').length;
   const pendingRequests = listRequests().filter(
     (request) => request.fromMemberId === me.id && request.status === 'pending',
@@ -58,9 +56,13 @@ export default function InicioScreen() {
     (item) => typesById[item.shiftTypeId]?.kind === 'work',
   );
 
-  const todayTitle = shift?.kind === 'work' ? shift.label : shift?.kind === 'rest' ? 'Día libre' : 'Sin turno';
-  const todayHours = assignment && shift?.kind === 'work'
-    ? formatIntervals(effectiveIntervals(assignment, typesById))
+  const todayTitle =
+    shift?.kind === 'work' ? shift.label : shift?.kind === 'rest' ? 'Día libre' : 'Sin turno';
+  const todayIntervals =
+    assignment && shift?.kind === 'work' ? effectiveIntervals(assignment, typesById) : [];
+  const todayHoursCount = Math.round((intervalsTotalMinutes(todayIntervals) / 60) * 10) / 10;
+  const todayHours = todayIntervals.length
+    ? formatIntervals(todayIntervals)
     : shift?.kind === 'rest'
       ? 'Disfruta del descanso'
       : 'Añádelo desde Mi semana';
@@ -83,26 +85,46 @@ export default function InicioScreen() {
       </View>
 
       <HardCard
-        color={shift?.color ?? colors.backgroundSelected}
+        color={shift?.color ?? '#E8E6DD'}
         shadowOffset={6}
         onPress={() => router.push('/(tabs)/semana')}
-        contentStyle={{ padding: 18, gap: 16 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Caption style={{ color: '#2E2E2E', fontFamily: Fonts.bodyBold }}>TU TURNO DE HOY</Caption>
-            <Text style={{ color: '#2E2E2E', fontFamily: Fonts.display, fontSize: 28 }}>
-              {todayTitle}
-            </Text>
-            <Body style={{ color: '#2E2E2E', fontFamily: Fonts.bodyMedium }}>{todayHours}</Body>
-          </View>
-          <View style={{ backgroundColor: '#FFFFFF99', borderRadius: Radii.pill, paddingHorizontal: 11, paddingVertical: 6 }}>
-            <Caption style={{ color: '#2E2E2E', fontFamily: Fonts.bodyBold }}>{hours} h</Caption>
-          </View>
+        contentStyle={{ padding: 18, gap: 6, minHeight: 150, justifyContent: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Caption style={{ flex: 1, color: '#2E2E2E', fontFamily: Fonts.bodyBold }}>
+            TU TURNO DE HOY
+          </Caption>
+          {todayHoursCount > 0 ? (
+            <View
+              style={{
+                backgroundColor: '#FFFFFF99',
+                borderRadius: Radii.pill,
+                paddingHorizontal: 11,
+                paddingVertical: 6,
+              }}>
+              <Caption style={{ color: '#2E2E2E', fontFamily: Fonts.bodyBold }}>
+                {todayHoursCount} h
+              </Caption>
+            </View>
+          ) : null}
         </View>
+        <Hero style={{ color: '#2E2E2E' }}>{todayTitle}</Hero>
+        <Body style={{ color: '#2E2E2E', fontFamily: Fonts.bodyMedium }}>{todayHours}</Body>
+      </HardCard>
 
-        <View style={{ height: BorderWidth, backgroundColor: '#2E2E2E', opacity: 0.15 }} />
-
-        <View style={{ flexDirection: 'row' }}>
+      <View style={{ gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Heading style={{ flex: 1 }}>Mi semana</Heading>
+          <Pressable
+            onPress={() => router.push('/(tabs)/semana')}
+            hitSlop={8}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+            <Caption style={{ fontFamily: Fonts.bodyBold }}>Editar</Caption>
+            <HugeiconsIcon icon={ArrowRight01Icon} size={12} color={colors.text} strokeWidth={2} />
+          </Pressable>
+        </View>
+        <Pressable
+          onPress={() => router.push('/(tabs)/semana')}
+          style={{ flexDirection: 'row', gap: 6 }}>
           {days.map((date, index) => {
             const dayAssignment = getAssignment(me.id, date);
             const dayShift = dayAssignment ? typesById[dayAssignment.shiftTypeId] : undefined;
@@ -111,60 +133,58 @@ export default function InicioScreen() {
               <View key={date} style={{ flex: 1, minWidth: 0, alignItems: 'center', gap: 6 }}>
                 <Text
                   style={{
-                    color: selected ? '#2E2E2E' : '#6B6B66',
+                    color: selected ? colors.text : colors.textSecondary,
                     fontFamily: Fonts.bodyBold,
                     fontSize: 10,
                   }}>
                   {['L', 'M', 'X', 'J', 'V', 'S', 'D'][index]}
                 </Text>
-                <View
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: 13,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: selected ? '#2E2E2E' : 'transparent',
-                  }}>
-                  <Text
+                <View style={{ alignSelf: 'stretch', paddingRight: 3, paddingBottom: 3 }}>
+                  {selected ? (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: 3,
+                        left: 3,
+                        right: 0,
+                        bottom: 0,
+                        borderRadius: Radii.inner,
+                        backgroundColor: colors.shadow,
+                      }}
+                    />
+                  ) : null}
+                  <View
                     style={{
-                      color: selected ? '#FAF9F5' : '#2E2E2E',
-                      fontFamily: selected ? Fonts.display : Fonts.displaySemi,
-                      fontSize: 15,
+                      height: 46,
+                      borderRadius: Radii.inner,
+                      borderWidth: BorderWidth,
+                      borderStyle: dayShift ? 'solid' : 'dashed',
+                      borderColor: dayShift ? colors.border : colors.textSecondary,
+                      backgroundColor: dayShift?.color ?? colors.surface,
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}>
-                    {Number(date.slice(8, 10))}
-                  </Text>
+                    <Text
+                      style={{
+                        color: dayShift ? '#2E2E2E' : colors.textSecondary,
+                        fontFamily: selected ? Fonts.display : Fonts.displaySemi,
+                        fontSize: 16,
+                      }}>
+                      {Number(date.slice(8, 10))}
+                    </Text>
+                  </View>
                 </View>
-                <View
-                  style={{
-                    width: 11,
-                    height: 11,
-                    borderRadius: 6,
-                    borderWidth: BorderWidth,
-                    borderColor: '#2E2E2E',
-                    backgroundColor: dayShift?.color ?? 'transparent',
-                    opacity: dayShift ? 1 : 0.3,
-                  }}
-                />
               </View>
             );
           })}
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Caption style={{ flex: 1, color: '#2E2E2E' }}>
-            {nextAssignment
-              ? `Próximo: ${formatDayShort(nextAssignment.date)} · ${typesById[nextAssignment.shiftTypeId]?.label}`
-              : 'Mi semana'}
+        </Pressable>
+        {nextAssignment ? (
+          <Caption color="secondary">
+            Próximo turno: {formatDayShort(nextAssignment.date)} ·{' '}
+            {typesById[nextAssignment.shiftTypeId]?.label}
           </Caption>
-          <Caption style={{ color: '#2E2E2E', fontFamily: Fonts.bodyBold }}>Editar</Caption>
-          <SymbolView
-            name={{ ios: 'chevron.right', android: 'chevron_right' }}
-            size={12}
-            tintColor="#2E2E2E"
-          />
-        </View>
-      </HardCard>
+        ) : null}
+      </View>
 
       <View style={{ gap: 10 }}>
         <Heading>Accesos rápidos</Heading>
@@ -172,25 +192,28 @@ export default function InicioScreen() {
           <QuickAction
             eyebrow="EQUIPO"
             value={`${team.working.length} trabajando`}
-            detail={`${team.resting.length} libran hoy`}
+            detail={
+              team.unknownCount
+                ? `${team.unknownCount} sin turno informado`
+                : `${team.resting.length} libran hoy`
+            }
             color={Palette.mint}
-            icon={{ ios: 'person.2', android: 'groups' }}
+            icon={UserGroupIcon}
             onPress={() => router.push('/(tabs)/equipo')}
           />
           <QuickAction
             eyebrow="CAMBIOS"
-            value={openOffers ? `${openOffers} ${openOffers === 1 ? 'oferta' : 'ofertas'}` : 'Todo al día'}
+            value={
+              openOffers
+                ? `${openOffers} ${openOffers === 1 ? 'oferta' : 'ofertas'}`
+                : 'Todo al día'
+            }
             detail={pendingRequests ? `${pendingRequests} pendiente` : 'Sin pendientes'}
             color={Palette.sky}
-            icon={{ ios: 'arrow.left.arrow.right', android: 'swap_horiz' }}
+            icon={Exchange01Icon}
             onPress={() => router.push('/(tabs)/cambios')}
           />
         </View>
-        <ActionRow
-          title="Mi equipo"
-          detail={team.unknownCount ? `${team.unknownCount} sin turno informado` : 'Todo el equipo ha informado su turno'}
-          onPress={() => router.push('/(tabs)/equipo')}
-        />
       </View>
     </Screen>
   );
@@ -208,13 +231,16 @@ function QuickAction({
   value: string;
   detail: string;
   color: string;
-  icon:
-    | { ios: 'person.2'; android: 'groups' }
-    | { ios: 'arrow.left.arrow.right'; android: 'swap_horiz' };
+  icon: typeof UserGroupIcon;
   onPress: () => void;
 }) {
   return (
-    <HardCard color={color} onPress={onPress} shadowOffset={4} style={{ flex: 1 }} contentStyle={{ padding: 14, gap: 5, minHeight: 112 }}>
+    <HardCard
+      color={color}
+      onPress={onPress}
+      shadowOffset={4}
+      style={{ flex: 1 }}
+      contentStyle={{ padding: 14, gap: 5, minHeight: 112 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
         <View
           style={{
@@ -225,32 +251,12 @@ function QuickAction({
             justifyContent: 'center',
             backgroundColor: '#FFFFFF99',
           }}>
-          <SymbolView name={icon} size={17} tintColor="#2E2E2E" />
+          <HugeiconsIcon icon={icon} size={17} color="#2E2E2E" strokeWidth={2} />
         </View>
         <Caption style={{ color: '#2E2E2E', fontFamily: Fonts.bodyBold }}>{eyebrow}</Caption>
       </View>
       <Heading style={{ color: '#2E2E2E' }}>{value}</Heading>
       <Caption style={{ color: '#2E2E2E' }}>{detail}</Caption>
-    </HardCard>
-  );
-}
-
-function ActionRow({ title, detail, onPress }: { title: string; detail: string; onPress: () => void }) {
-  const colors = useTheme();
-  return (
-    <HardCard
-      onPress={onPress}
-      shadowOffset={3}
-      contentStyle={{ padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Body style={{ fontFamily: Fonts.bodyBold }}>{title}</Body>
-          <Caption color="secondary">{detail}</Caption>
-        </View>
-        <SymbolView
-          name={{ ios: 'chevron.right', android: 'chevron_right' }}
-          size={20}
-          tintColor={colors.textSecondary}
-        />
     </HardCard>
   );
 }

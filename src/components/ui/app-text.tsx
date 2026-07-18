@@ -12,7 +12,12 @@ interface Props {
 }
 
 function makeRole(role: TypeRole) {
-  return function RoleText({ children, color = 'text', style, numberOfLines }: PropsWithChildren<Props>) {
+  return function RoleText({
+    children,
+    color = 'text',
+    style,
+    numberOfLines,
+  }: PropsWithChildren<Props>) {
     const colors = useTheme();
     const resolved =
       color === 'text' ? colors.text : color === 'secondary' ? colors.textSecondary : color;

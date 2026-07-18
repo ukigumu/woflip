@@ -60,15 +60,15 @@ export function DayRow({
   return (
     <View style={styles.row}>
       <View style={styles.day}>
-        <Text
-          style={[
-            styles.dayText,
-            { color: isToday ? colors.text : colors.textSecondary },
-          ]}>
+        <Text style={[styles.dayText, { color: isToday ? colors.text : colors.textSecondary }]}>
           {formatDayShort(date)}
         </Text>
         {isToday ? (
-          <View style={[styles.todayBadge, { backgroundColor: colors.accent, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.todayBadge,
+              { backgroundColor: colors.accent, borderColor: colors.border },
+            ]}>
             <Text style={styles.todayBadgeText}>HOY</Text>
           </View>
         ) : null}

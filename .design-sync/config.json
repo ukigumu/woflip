@@ -1,0 +1,29 @@
+{
+  "projectId": "ab7f2560-6baa-44f4-9780-1d25c4ac27d3",
+  "shape": "package",
+  "pkg": "woflip",
+  "globalName": "Woflip",
+  "tsconfig": ".design-sync/tsconfig.sync.json",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "Screen": { "cardMode": "column" },
+    "AppTabBar": { "cardMode": "column" }
+  },
+  "extraFonts": [".design-sync/fonts.css"],
+  "componentSrcMap": {
+    "Body": "src/components/ui/app-text.tsx",
+    "Caption": "src/components/ui/app-text.tsx",
+    "Heading": "src/components/ui/app-text.tsx",
+    "Hero": "src/components/ui/app-text.tsx",
+    "Title": "src/components/ui/app-text.tsx",
+    "Avatar": "src/components/ui/avatar.tsx",
+    "Field": "src/components/ui/field.tsx",
+    "HardCard": "src/components/ui/hard-card.tsx",
+    "PillButton": "src/components/ui/pill-button.tsx",
+    "Screen": "src/components/ui/screen.tsx",
+    "Segmented": "src/components/ui/segmented.tsx",
+    "AppTabBar": "src/components/ui/tab-bar.tsx",
+    "TimeRangeField": "src/components/ui/time-range-field.tsx",
+    "DayRow": "src/components/day-row.tsx"
+  }
+}

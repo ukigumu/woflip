@@ -1,6 +1,12 @@
+import {
+  Calendar03Icon,
+  SquareLock02Icon,
+  Tap01Icon,
+  UserGroupIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import {
   KeyboardAvoidingView,
@@ -117,7 +123,9 @@ export default function OnboardingScreen() {
     setLeaving(true);
     haptics.impact();
     // Persistir ANTES de animar: si matan la app a mitad, el estado es coherente.
-    days.forEach((date, i) => setDayShift(me.id, date, draft[i]));
+    days.forEach((date, i) => {
+      setDayShift(me.id, date, draft[i]);
+    });
     updateSettings({ onboardingDone: true });
     if (reduceMotion) {
       router.replace('/(tabs)/semana');
@@ -149,9 +157,7 @@ export default function OnboardingScreen() {
             <View style={{ flex: 1, paddingTop: Spacing.six, gap: Spacing.four }}>
               <Animated.View entering={FadeInDown.springify(300)} style={{ gap: Spacing.two }}>
                 <Hero numberOfLines={1}>Primero, tú</Hero>
-                <Body color="secondary">
-                  Escribe tu nombre: es lo único que verá tu equipo.
-                </Body>
+                <Body color="secondary">Escribe tu nombre: es lo único que verá tu equipo.</Body>
               </Animated.View>
 
               <Animated.View entering={FadeInDown.delay(140).springify(300)}>
@@ -195,7 +201,9 @@ export default function OnboardingScreen() {
             <View style={{ flex: 1, paddingTop: Spacing.six, gap: Spacing.three }}>
               <Animated.View entering={FadeInDown.springify(300)} style={{ gap: Spacing.two }}>
                 <Hero>¿Quién ve tu horario?</Hero>
-                <Body color="secondary">Tú decides. Puedes cambiarlo cuando quieras en Perfil.</Body>
+                <Body color="secondary">
+                  Tú decides. Puedes cambiarlo cuando quieras en Perfil.
+                </Body>
               </Animated.View>
 
               <Animated.View entering={FadeInDown.delay(120).springify(300)}>
@@ -208,7 +216,7 @@ export default function OnboardingScreen() {
                   accessibilityLabel="Mi equipo. Tus compañeros ven tus turnos y tus horas exactas."
                   contentStyle={styles.privacyCard}>
                   <View style={styles.privacyHeader}>
-                    <PrivacyIcon symbol="person.2.fill" />
+                    <IconBubble icon={UserGroupIcon} />
                     <Heading style={{ flex: 1 }}>Mi equipo</Heading>
                   </View>
                   <Body color="secondary">Tus compañeros ven tus turnos y tus horas exactas.</Body>
@@ -225,7 +233,7 @@ export default function OnboardingScreen() {
                   accessibilityLabel="Solo yo. Nadie ve tus turnos ni tus horas. El emparejamiento ciego funciona igual."
                   contentStyle={styles.privacyCard}>
                   <View style={styles.privacyHeader}>
-                    <PrivacyIcon symbol="lock.fill" />
+                    <IconBubble icon={SquareLock02Icon} />
                     <Heading style={{ flex: 1 }}>Solo yo</Heading>
                   </View>
                   <Body color="secondary">Nadie ve tus turnos ni tus horas.</Body>
@@ -258,19 +266,21 @@ export default function OnboardingScreen() {
                 </Body>
               </Animated.View>
 
-              <Animated.View entering={FadeInDown.delay(140).springify(300)}>
+              <Animated.View
+                entering={FadeInDown.delay(140).springify(300)}
+                style={[styles.demoFrame, { borderColor: colors.textSecondary }]}>
                 <DemoDay date={days[0]} ordered={ordered} typesById={typesById} />
               </Animated.View>
 
               <Animated.View
                 entering={FadeInDown.delay(220).springify(300)}
-                style={{ gap: Spacing.two }}>
-                <Body color="secondary">
-                  •  Mantén pulsado un día para ajustar sus horas exactas.
-                </Body>
-                <Body color="secondary">
-                  •  Tu semana viene con un ejemplo: cámbiala a tu patrón real.
-                </Body>
+                style={{ gap: Spacing.three }}>
+                <TipRow icon={Tap01Icon}>
+                  Mantén pulsado un día para ajustar sus horas exactas.
+                </TipRow>
+                <TipRow icon={Calendar03Icon}>
+                  Tu semana viene con un ejemplo: cámbiala a tu patrón real.
+                </TipRow>
               </Animated.View>
             </View>
             <PillButton
@@ -350,7 +360,9 @@ function Header({ step, onBack }: { step: Step; onBack?: () => void }) {
   return (
     <View style={styles.header}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
-        {onBack ? <PillButton size="sm" label="‹" onPress={onBack} /> : null}
+        {onBack ? (
+          <PillButton size="sm" icon="arrow-left" accessibilityLabel="Atrás" onPress={onBack} />
+        ) : null}
         <Image
           source={require('../../assets/woflip-logo.svg')}
           contentFit="contain"
@@ -384,21 +396,34 @@ function Header({ step, onBack }: { step: Step; onBack?: () => void }) {
   );
 }
 
-/** Círculo lavanda con SF Symbol (fallback de punto, como la tab bar). */
-function PrivacyIcon({ symbol }: { symbol: 'lock.fill' | 'person.2.fill' }) {
+/** Círculo lavanda con un icono Hugeicons. */
+function IconBubble({ icon, size = 40 }: { icon: typeof UserGroupIcon; size?: number }) {
   const colors = useTheme();
   return (
     <View
-      style={[
-        styles.privacyIcon,
-        { backgroundColor: colors.accent, borderColor: colors.border },
-      ]}>
-      <SymbolView
-        name={symbol}
-        size={20}
-        tintColor="#2E2E2E"
-        fallback={<Text style={{ fontSize: 16, color: '#2E2E2E' }}>•</Text>}
-      />
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        borderWidth: BorderWidth,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.accent,
+        borderColor: colors.border,
+      }}>
+      <HugeiconsIcon icon={icon} size={size / 2} color="#2E2E2E" strokeWidth={2} />
+    </View>
+  );
+}
+
+/** Consejo del paso "Así funciona": burbuja de icono + una línea. */
+function TipRow({ icon, children }: PropsWithChildren<{ icon: typeof UserGroupIcon }>) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <IconBubble icon={icon} size={32} />
+      <Body color="secondary" style={{ flex: 1 }}>
+        {children}
+      </Body>
     </View>
   );
 }
@@ -463,7 +488,9 @@ function SettleRow({
 
   return (
     <Animated.View
-      entering={FadeInDown.delay(60 + index * 45).springify(300).dampingRatio(0.8)}
+      entering={FadeInDown.delay(60 + index * 45)
+        .springify(300)
+        .dampingRatio(0.8)}
       style={settleStyle}>
       {children}
     </Animated.View>
@@ -488,7 +515,8 @@ function ShiftChip({ shiftType, onPress }: { shiftType: ShiftType; onPress: () =
         { borderColor: colors.border, backgroundColor: colors.surface },
         pressed && { backgroundColor: colors.backgroundElement },
       ]}>
-      <View style={[styles.codeBadge, { borderColor: '#2E2E2E', backgroundColor: shiftType.color }]}>
+      <View
+        style={[styles.codeBadge, { borderColor: '#2E2E2E', backgroundColor: shiftType.color }]}>
         <Text style={styles.codeText}>{shiftType.code}</Text>
       </View>
       <Text style={[styles.shiftChipLabel, { color: colors.textSecondary }]} numberOfLines={1}>
@@ -532,13 +560,12 @@ const styles = StyleSheet.create({
   },
   privacyCard: { padding: Spacing.three, gap: Spacing.two },
   privacyHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  privacyIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  demoFrame: {
     borderWidth: BorderWidth,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderStyle: 'dashed',
+    borderRadius: Radii.card,
+    padding: Spacing.three,
+    paddingBottom: Spacing.three - 8, // la DayRow ya trae 8 de marginBottom
   },
   codeBadge: {
     width: 30,

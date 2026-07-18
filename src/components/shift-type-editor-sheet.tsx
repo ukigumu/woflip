@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
-import { Body, Caption, Heading } from '@/components/ui/app-text';
+import { Caption, Title } from '@/components/ui/app-text';
 import { Field } from '@/components/ui/field';
 import { PillButton } from '@/components/ui/pill-button';
 import { Sheet } from '@/components/ui/sheet';
+import { TimeRangeField } from '@/components/ui/time-range-field';
 import { Palette, ShiftPalette } from '@/constants/palette';
-import { BorderWidth } from '@/constants/theme';
+import { BorderWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { saveShiftType } from '@/lib/store';
 import type { Interval, ShiftType } from '@/lib/types';
@@ -20,8 +21,6 @@ const COLOR_CHOICES = [
   Palette.mint,
   Palette.sky,
 ];
-
-const HHMM_RE = /^([01]?\d|2[0-4]):[0-5]\d$/;
 
 interface Props {
   /** Turno-tipo a editar; null = sheet cerrado. */
@@ -56,35 +55,35 @@ function EditorBody({ shiftType, onDone }: { shiftType: ShiftType; onDone: () =>
       setError('El nombre no puede estar vacío');
       return;
     }
-    if (isWork && intervals.some((iv) => !HHMM_RE.test(iv.start) || !HHMM_RE.test(iv.end))) {
-      setError('Las horas deben tener formato HH:MM (ej. 08:00)');
-      return;
-    }
     saveShiftType({ ...shiftType, label: trimmed, intervals, color });
     onDone();
   }
 
   return (
-    <View style={{ gap: 14 }}>
-      <Heading>{`Editar ${shiftType.code}`}</Heading>
+    <View style={{ gap: Spacing.three }}>
+      <Title>{`Editar ${shiftType.code}`}</Title>
 
-      <View style={{ gap: 6 }}>
+      <View style={{ gap: Spacing.two }}>
         <Caption color="secondary">Nombre</Caption>
         <Field value={label} onChangeText={setLabel} placeholder="Nombre del turno" />
       </View>
 
       {isWork
         ? intervals.map((iv, i) => (
-            <IntervalEditor
-              key={`${shiftType.id}-${i}`}
-              index={i}
-              interval={iv}
-              showRemove={intervals.length > 1}
-              onChange={(next) =>
-                setIntervals((prev) => prev.map((p, j) => (j === i ? next : p)))
-              }
-              onRemove={() => setIntervals((prev) => prev.filter((_, j) => j !== i))}
-            />
+            <View key={`${shiftType.id}-${i}`} style={{ gap: Spacing.two }}>
+              <Caption color="secondary">{`Tramo ${i + 1}`}</Caption>
+              <TimeRangeField
+                value={iv}
+                onChange={(next) =>
+                  setIntervals((prev) => prev.map((p, j) => (j === i ? next : p)))
+                }
+                onRemove={
+                  intervals.length > 1
+                    ? () => setIntervals((prev) => prev.filter((_, j) => j !== i))
+                    : undefined
+                }
+              />
+            </View>
           ))
         : null}
 
@@ -93,24 +92,23 @@ function EditorBody({ shiftType, onDone }: { shiftType: ShiftType; onDone: () =>
           <PillButton
             size="sm"
             label="＋ Añadir tramo"
-            onPress={() =>
-              setIntervals((prev) => [...prev, { start: '20:00', end: '24:00' }])
-            }
+            onPress={() => setIntervals((prev) => [...prev, { start: '20:00', end: '24:00' }])}
           />
         </View>
       ) : null}
 
-      <View style={{ gap: 6 }}>
+      <View style={{ gap: Spacing.two }}>
         <Caption color="secondary">Color</Caption>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {COLOR_CHOICES.map((c) => (
             <Pressable
               key={c}
               onPress={() => setColor(c)}
+              hitSlop={4}
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
+                width: 38,
+                height: 38,
+                borderRadius: 19,
                 backgroundColor: c,
                 borderWidth: color === c ? 3 : BorderWidth,
                 borderColor: colors.border,
@@ -123,54 +121,9 @@ function EditorBody({ shiftType, onDone }: { shiftType: ShiftType; onDone: () =>
 
       {error ? <Caption color={colors.danger}>{error}</Caption> : null}
 
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <PillButton size="sm" label="Cancelar" onPress={onDone} />
-        <PillButton variant="primary" label="Guardar" onPress={save} />
-      </View>
-    </View>
-  );
-}
-
-function IntervalEditor({
-  index,
-  interval,
-  showRemove,
-  onChange,
-  onRemove,
-}: {
-  index: number;
-  interval: Interval;
-  showRemove: boolean;
-  onChange: (next: Interval) => void;
-  onRemove: () => void;
-}) {
-  const colors = useTheme();
-  return (
-    <View style={{ gap: 6 }}>
-      <Caption color="secondary">{`Tramo ${index + 1}`}</Caption>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <Field
-          value={interval.start}
-          onChangeText={(t) => onChange({ ...interval, start: t })}
-          placeholder="08:00"
-          autoCapitalize="none"
-          autoCorrect={false}
-          style={{ flex: 1 }}
-        />
-        <Body>–</Body>
-        <Field
-          value={interval.end}
-          onChangeText={(t) => onChange({ ...interval, end: t })}
-          placeholder="16:00"
-          autoCapitalize="none"
-          autoCorrect={false}
-          style={{ flex: 1 }}
-        />
-        {showRemove ? (
-          <Pressable onPress={onRemove} hitSlop={8}>
-            <Text style={{ fontSize: 18, color: colors.danger }}>✕</Text>
-          </Pressable>
-        ) : null}
+      <View style={{ flexDirection: 'row', gap: Spacing.three, marginTop: Spacing.two }}>
+        <PillButton label="Cancelar" onPress={onDone} style={{ flex: 1 }} />
+        <PillButton variant="primary" label="Guardar" onPress={save} style={{ flex: 1 }} />
       </View>
     </View>
   );

@@ -1,4 +1,11 @@
-import { SymbolView } from 'expo-symbols';
+import {
+  Calendar03Icon,
+  Exchange01Icon,
+  Home01Icon,
+  UserCircleIcon,
+  UserGroupIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -10,12 +17,12 @@ import { useTheme } from '@/hooks/use-theme';
 const SHADOW = 4;
 const PAD = 5;
 
-const TABS: Record<string, { label: string; icon: { ios: 'house' | 'calendar' | 'person.2' | 'arrow.left.arrow.right' | 'person.crop.circle'; android: 'home' | 'calendar_month' | 'groups' | 'swap_horiz' | 'account_circle' } }> = {
-  hoy: { label: 'Inicio', icon: { ios: 'house', android: 'home' } },
-  semana: { label: 'Mi semana', icon: { ios: 'calendar', android: 'calendar_month' } },
-  equipo: { label: 'Mi equipo', icon: { ios: 'person.2', android: 'groups' } },
-  cambios: { label: 'Cambios', icon: { ios: 'arrow.left.arrow.right', android: 'swap_horiz' } },
-  perfil: { label: 'Perfil', icon: { ios: 'person.crop.circle', android: 'account_circle' } },
+const TABS: Record<string, { label: string; icon: typeof Home01Icon }> = {
+  hoy: { label: 'Inicio', icon: Home01Icon },
+  semana: { label: 'Semana', icon: Calendar03Icon },
+  equipo: { label: 'Equipo', icon: UserGroupIcon },
+  cambios: { label: 'Cambios', icon: Exchange01Icon },
+  perfil: { label: 'Perfil', icon: UserCircleIcon },
 };
 
 interface Route {
@@ -27,11 +34,9 @@ interface Route {
 interface Props {
   state: { index: number; routes: Route[] };
   navigation: {
-    emit: (event: {
-      type: 'tabPress';
-      target?: string;
-      canPreventDefault: true;
-    }) => { defaultPrevented: boolean };
+    emit: (event: { type: 'tabPress'; target?: string; canPreventDefault: true }) => {
+      defaultPrevented: boolean;
+    };
     navigate: (name: string) => void;
   };
 }
@@ -53,10 +58,15 @@ export function AppTabBar({ state, navigation }: Props) {
   useEffect(() => {
     if (itemWidth > 0) {
       // Término medio: 300ms con un toque justo de muelle.
-      x.value = withSpring(state.index * itemWidth, { duration: 300, dampingRatio: 0.8 });
+      x.value = withSpring(state.index * itemWidth, {
+        duration: 300,
+        dampingRatio: 0.8,
+      });
     }
   }, [state.index, itemWidth, x]);
-  const pillStyle = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+  const pillStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: x.value }],
+  }));
 
   return (
     <View
@@ -126,12 +136,17 @@ export function AppTabBar({ state, navigation }: Props) {
             <Pressable
               key={route.key}
               onPress={onPress}
-              style={{ flex: 1, alignItems: 'center', gap: 3, paddingVertical: 9 }}>
-              <SymbolView
-                name={tab.icon}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                gap: 3,
+                paddingVertical: 9,
+              }}>
+              <HugeiconsIcon
+                icon={tab.icon}
                 size={24}
-                tintColor={color}
-                fallback={<Text style={{ fontSize: 20, color }}>•</Text>}
+                color={color}
+                strokeWidth={focused ? 2 : 1.7}
               />
               <Text
                 style={{

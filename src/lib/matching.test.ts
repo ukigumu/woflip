@@ -1,8 +1,4 @@
-import {
-  findSwapCandidates,
-  type MatchInput,
-  restBetweenDays,
-} from './matching';
+import { findSwapCandidates, type MatchInput, restBetweenDays } from './matching';
 import { buildSeedAssignments, defaultShiftTypes, ME_ID } from './seed';
 import { addDaysISO, mondayOf, weekdayIndex } from './dates';
 import type { Assignment } from './types';
@@ -31,13 +27,19 @@ function baseInput(overrides: Partial<MatchInput>): MatchInput {
 
 describe('restBetweenDays', () => {
   test('T (16–24) seguido de M (08–16) da 8 h: viola las 12 h', () => {
-    const rest = restBetweenDays([{ start: '16:00', end: '24:00' }], [{ start: '08:00', end: '16:00' }]);
+    const rest = restBetweenDays(
+      [{ start: '16:00', end: '24:00' }],
+      [{ start: '08:00', end: '16:00' }],
+    );
     expect(rest).toBe(480);
   });
 
   test('caso 10 — el tramo que cruza medianoche (22–06) reduce el descanso', () => {
     // Sale a las 06:00 y entra a las 10:00 del mismo día: solo 4 h de descanso.
-    const rest = restBetweenDays([{ start: '22:00', end: '06:00' }], [{ start: '10:00', end: '18:00' }]);
+    const rest = restBetweenDays(
+      [{ start: '22:00', end: '06:00' }],
+      [{ start: '10:00', end: '18:00' }],
+    );
     expect(rest).toBe(240);
   });
 
@@ -94,8 +96,14 @@ describe('findSwapCandidates — días cruzados (rest_day)', () => {
   test('caso 4 — el intercambio dejaría a Bea con 7 días seguidos ⇒ excluido', () => {
     // Bea encadena 6 días (mar 30 jun – dom 5 jul) y libra el lunes 6.
     // Si coge mi lunes 6, el lunes puentea la racha: 7 días seguidos.
-    const bea6days = ['2026-06-30', '2026-07-01', '2026-07-02', '2026-07-03', '2026-07-04', '2026-07-05']
-      .map((d) => mk('bea', d, 'M'));
+    const bea6days = [
+      '2026-06-30',
+      '2026-07-01',
+      '2026-07-02',
+      '2026-07-03',
+      '2026-07-04',
+      '2026-07-05',
+    ].map((d) => mk('bea', d, 'M'));
     const input = baseInput({
       assignments: [
         mk('me', '2026-07-06', 'M'),
@@ -125,7 +133,10 @@ describe('findSwapCandidates — días cruzados (rest_day)', () => {
   test('caso 6 — el override del día prevalece sobre el tipo', () => {
     // Igual que el caso 3, pero el domingo de Bea tiene override que acaba a las 18:00:
     // descanso 08:00 lunes − 18:00 domingo = 14 h ⇒ ahora SÍ es candidata.
-    const beaSunday = { ...mk('bea', '2026-07-05', 'T'), overrideIntervals: [{ start: '10:00', end: '18:00' }] };
+    const beaSunday = {
+      ...mk('bea', '2026-07-05', 'T'),
+      overrideIntervals: [{ start: '10:00', end: '18:00' }],
+    };
     const input = baseInput({
       assignments: [
         mk('me', '2026-07-06', 'M'),

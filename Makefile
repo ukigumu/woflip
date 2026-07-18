@@ -7,6 +7,7 @@
 	build-android build-ios build-android-staging build-ios-staging build-all build-all-staging \
 	build-android-local build-ios-local build-android-staging-local build-ios-staging-local \
 	build-all-local build-all-staging-local \
+	validate-ios-release testflight-local \
 	submit-android submit-ios submit-android-staging submit-ios-staging \
 	submit-android-local submit-ios-local submit-android-staging-local submit-ios-staging-local \
 	submit-all submit-all-local submit-all-staging \
@@ -15,13 +16,14 @@
 LOAD_ENV = set -a; [ ! -f .env ] || . ./.env; set +a;
 BUMP ?= patch
 MESSAGE ?= OTA update
+IOS_IPA ?= builds/ios-production.ipa
 
 # ─────────────────────────────────────────────────────────────
 # Help
 # ─────────────────────────────────────────────────────────────
 
 help:
-	@echo "Woblip · Makefile"
+	@echo "Woflip · Makefile"
 	@echo ""
 	@echo "  Dev:"
 	@echo "    make dev               expo start (Metro bundler)"
@@ -54,6 +56,9 @@ help:
 	@echo ""
 	@echo "  EAS local build (production):"
 	@echo "    make build-android-local | build-ios-local | build-all-local"
+	@echo "    make validate-ios-release  validate Expo config and TypeScript"
+	@echo "    make testflight-local      validate and build the iOS IPA locally"
+	@echo "    make submit-ios-local      submit the local IPA with Expo EAS"
 	@echo ""
 	@echo "  EAS local build (staging):"
 	@echo "    make build-{android,ios,all}-staging-local"
@@ -180,7 +185,13 @@ build-android-local:
 
 build-ios-local:
 	@mkdir -p builds
-	set -a && source .env && set +a && eas build --platform ios --profile production --local --output builds/ios-production.ipa
+	$(LOAD_ENV) eas build --platform ios --profile production --local --output $(IOS_IPA)
+
+validate-ios-release:
+	npx expo-doctor@latest
+	pnpm typecheck
+
+testflight-local: validate-ios-release build-ios-local
 
 build-android-staging-local:
 	@mkdir -p builds

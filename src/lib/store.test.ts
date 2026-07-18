@@ -15,8 +15,8 @@ import {
   updateSettings,
 } from './store';
 
-// jest.mock se iza por encima de los imports: el KV nativo nunca llega a cargarse.
-jest.mock('expo-sqlite/kv-store', () => {
+// vi.mock se iza por encima de los imports: el KV nativo nunca llega a cargarse.
+vi.mock('expo-sqlite/kv-store', () => {
   const map = new Map<string, string>();
   return {
     __esModule: true,

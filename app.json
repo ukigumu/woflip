@@ -8,7 +8,11 @@
     "scheme": "woflip",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.grumpysoftware.woflip"
+      "bundleIdentifier": "com.grumpysoftware.woflip",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,6 +41,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "87d2315f-53bf-459d-a355-3d9fe52a5d50"
+      }
     }
   }
 }

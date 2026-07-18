@@ -36,7 +36,14 @@ export function Sheet({ visible, onDismiss, children }: PropsWithChildren<Props>
       <RNHostView matchContents>
         {/* Ancho explícito: RNHostView mide el contenido, no llena el sheet.
             El sheet nativo mete 16 de padding a cada lado. */}
-        <View style={{ width: width - 32, gap: Spacing.three, paddingBottom: Spacing.three }}>
+        <View
+          style={{
+            width: width - 32,
+            gap: Spacing.three,
+            paddingHorizontal: Spacing.two,
+            paddingTop: Spacing.two,
+            paddingBottom: Spacing.four,
+          }}>
           {children}
         </View>
       </RNHostView>
