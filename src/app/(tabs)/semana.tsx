@@ -67,7 +67,7 @@ export default function SemanaScreen() {
 
   function onCopyPreviousWeek() {
     const copied = copyWeek(me.id, addDaysISO(monday, -7), monday);
-    setFeedback(copied > 0 ? `${copied} días copiados ✓` : 'La semana anterior está vacía');
+    setFeedback(copied > 0 ? `${copied} días copiados` : 'La semana anterior está vacía');
   }
 
   function changeWeek(go: () => void) {

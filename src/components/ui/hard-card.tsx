@@ -1,5 +1,12 @@
 import type { PropsWithChildren } from 'react';
-import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  View,
+  type AccessibilityRole,
+  type AccessibilityState,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { BorderWidth, Radii } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -7,6 +14,8 @@ import { useTheme } from '@/hooks/use-theme';
 interface Props {
   /** Color de fondo de la card (default: surface del tema). */
   color?: string;
+  /** Color de fondo mientras la card está pulsada (además del "hundido"). */
+  pressedColor?: string;
   /** Desplazamiento de la sombra dura (px, sin blur). */
   shadowOffset?: number;
   radius?: number;
@@ -14,6 +23,10 @@ interface Props {
   onLongPress?: () => void;
   style?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
+  accessibilityRole?: AccessibilityRole;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityState?: AccessibilityState;
 }
 
 /**
@@ -24,12 +37,17 @@ interface Props {
 export function HardCard({
   children,
   color,
+  pressedColor,
   shadowOffset = 5,
   radius = Radii.card,
   onPress,
   onLongPress,
   style,
   contentStyle,
+  accessibilityRole,
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityState,
 }: PropsWithChildren<Props>) {
   const colors = useTheme();
   const o = shadowOffset;
@@ -44,6 +62,7 @@ export function HardCard({
       overflow: 'hidden',
     },
     pressed && { transform: [{ translateX: o - 1 }, { translateY: o - 1 }] },
+    pressed && pressedColor ? { backgroundColor: pressedColor } : null,
     contentStyle,
   ];
 
@@ -65,6 +84,10 @@ export function HardCard({
           onPress={onPress}
           onLongPress={onLongPress}
           delayLongPress={350}
+          accessibilityRole={accessibilityRole}
+          accessibilityLabel={accessibilityLabel}
+          accessibilityHint={accessibilityHint}
+          accessibilityState={accessibilityState}
           style={({ pressed }) => face(pressed)}>
           {children}
         </Pressable>

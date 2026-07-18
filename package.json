@@ -2,6 +2,10 @@
   "name": "woflip",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/nunito": "^0.4.2",
@@ -11,7 +15,9 @@
     "expo-device": "~57.0.1",
     "expo-font": "~57.0.1",
     "expo-glass-effect": "~57.0.1",
+    "expo-haptics": "~57.0.1",
     "expo-image": "~57.0.1",
+    "expo-image-picker": "~57.0.5",
     "expo-linking": "~57.0.3",
     "expo-router": "~57.0.6",
     "expo-splash-screen": "~57.0.4",
@@ -41,13 +47,23 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
+    "dev": "expo start",
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start:tunnel": "expo start --tunnel",
+    "android": "expo run:android --device",
+    "android:emulator": "expo run:android",
+    "ios": "expo run:ios --device",
+    "ios:simulator": "expo run:ios",
+    "ios:simulator:device": "expo run:ios --device",
     "web": "expo start --web",
-    "lint": "expo lint",
-    "test": "jest"
+    "build:web": "expo export -p web",
+    "clean:ios": "expo prebuild --clean --platform ios",
+    "clean:android": "expo prebuild --clean --platform android",
+    "clean": "expo prebuild --clean",
+    "typecheck": "tsc --noEmit",
+    "test:run": "vitest run",
+    "lint": "biome check .",
+    "i18n:diff": "node scripts/i18n-diff.mjs"
   },
   "private": true
 }

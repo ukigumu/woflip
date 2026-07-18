@@ -1,5 +1,5 @@
 /**
- * Modelo de datos local de WoFlip.
+ * Modelo de datos local de Woflip.
  * Espeja las decisiones de Woblip: intervalos como lista de tramos,
  * un assignment máximo por (miembro, fecha), y el día libre como
  * turno explícito de tipo 'rest' (distinto de "sin dato").
@@ -51,6 +51,8 @@ export interface Member {
   isMe: boolean;
   /** Opt-in individual a mostrar el horario completo. Default false. */
   shareFullSchedule: boolean;
+  /** Foto de perfil (uri local elegida por el usuario). Sin foto: inicial. */
+  photoUri?: string;
 }
 
 export interface Group {

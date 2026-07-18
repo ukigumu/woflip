@@ -59,6 +59,7 @@ export function PillButton({ label, onPress, variant = 'ghost', size = 'md', sty
       />
       <Pressable
         onPress={onPress}
+        accessibilityRole="button"
         style={({ pressed }) => [
           {
             borderWidth: BorderWidth,

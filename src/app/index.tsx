@@ -7,5 +7,5 @@ import { getSettings } from '@/lib/store';
 export default function Index() {
   useStoreVersion();
   const { onboardingDone } = getSettings();
-  return <Redirect href={onboardingDone ? '/(tabs)/semana' : '/onboarding'} />;
+  return <Redirect href={onboardingDone ? '/(tabs)/hoy' : '/onboarding'} />;
 }

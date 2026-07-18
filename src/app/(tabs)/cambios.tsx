@@ -81,7 +81,7 @@ function OffersTab() {
       </Caption>
 
       {offers.length === 0 ? (
-        <Caption color="secondary">No hay turnos ofrecidos ahora 🌵</Caption>
+        <Caption color="secondary">No hay turnos ofrecidos ahora</Caption>
       ) : (
         offers.map((o) => {
           const mine = o.fromMemberId === me.id;
@@ -111,7 +111,7 @@ function OffersTab() {
               ) : (
                 <Caption color="secondary">
                   {o.status === 'taken'
-                    ? `Se lo queda ${memberNames[o.takenByMemberId ?? ''] ?? 'alguien'} ✓`
+                    ? `Se lo queda ${memberNames[o.takenByMemberId ?? ''] ?? 'alguien'}`
                     : 'Cancelada'}
                 </Caption>
               )}
@@ -249,7 +249,7 @@ function ActiveRequestCard({
 
   return (
     <HardCard color={Palette.sun} contentStyle={{ padding: 14, gap: 8 }}>
-      <Heading style={{ color: '#2E2E2E' }}>Propuesta enviada 📨</Heading>
+      <Heading style={{ color: '#2E2E2E' }}>Propuesta enviada</Heading>
       <Body style={{ color: '#2E2E2E' }}>
         {`${count} ${count === 1 ? 'compañero compatible la ha recibido' : 'compañeros compatibles la han recibido'}. Sin nombres hasta que alguien acepte.`}
       </Body>
@@ -280,7 +280,7 @@ function ResultCard({
     return (
       <HardCard color={Palette.mint} contentStyle={{ padding: 16, gap: 8 }}>
         <Title style={{ color: '#2E2E2E' }}>
-          {`¡${memberNames[result.acceptedByMemberId] ?? 'Alguien'} ha aceptado! 🎉`}
+          {`¡${memberNames[result.acceptedByMemberId] ?? 'Alguien'} ha aceptado!`}
         </Title>
         <Body style={{ color: '#2E2E2E' }}>
           El cambio ya está aplicado: revisa tu semana. Enseña este acuerdo a tu encargado si lo

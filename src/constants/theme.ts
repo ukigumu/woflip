@@ -1,5 +1,5 @@
 /**
- * Tokens de diseño de WoFlip — lenguaje "neo-brutalista cálido":
+ * Tokens de diseño de Woflip — lenguaje "neo-brutalista cálido":
  * papel crema, bordes ink de 1.5px, sombras duras sin blur y píldoras.
  * En dark la sombra dura flipa a lavanda profunda (como la web de Woblip
  * flipa a mint en sus cards oscuras).
@@ -61,7 +61,7 @@ export const Fonts = {
 
 /** Escala tipográfica: 5 roles, nada de tamaños ad-hoc. */
 export const Type = {
-  hero: { fontSize: 34, fontFamily: Fonts.display },
+  hero: { fontSize: 34, lineHeight: 38, fontFamily: Fonts.display },
   title: { fontSize: 22, fontFamily: Fonts.display },
   heading: { fontSize: 17, fontFamily: Fonts.bodyBold },
   body: { fontSize: 15, fontFamily: Fonts.body },

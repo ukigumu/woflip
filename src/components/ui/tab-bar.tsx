@@ -10,9 +10,10 @@ import { useTheme } from '@/hooks/use-theme';
 const SHADOW = 4;
 const PAD = 5;
 
-const TABS: Record<string, { label: string; icon: { ios: 'calendar' | 'person.2' | 'arrow.left.arrow.right' | 'person.crop.circle'; android: 'calendar_month' | 'groups' | 'swap_horiz' | 'account_circle' } }> = {
-  semana: { label: 'Semana', icon: { ios: 'calendar', android: 'calendar_month' } },
-  hoy: { label: 'Hoy', icon: { ios: 'person.2', android: 'groups' } },
+const TABS: Record<string, { label: string; icon: { ios: 'house' | 'calendar' | 'person.2' | 'arrow.left.arrow.right' | 'person.crop.circle'; android: 'home' | 'calendar_month' | 'groups' | 'swap_horiz' | 'account_circle' } }> = {
+  hoy: { label: 'Inicio', icon: { ios: 'house', android: 'home' } },
+  semana: { label: 'Mi semana', icon: { ios: 'calendar', android: 'calendar_month' } },
+  equipo: { label: 'Mi equipo', icon: { ios: 'person.2', android: 'groups' } },
   cambios: { label: 'Cambios', icon: { ios: 'arrow.left.arrow.right', android: 'swap_horiz' } },
   perfil: { label: 'Perfil', icon: { ios: 'person.crop.circle', android: 'account_circle' } },
 };
@@ -134,7 +135,7 @@ export function AppTabBar({ state, navigation }: Props) {
               />
               <Text
                 style={{
-                  fontSize: 13,
+                  fontSize: 11,
                   fontFamily: focused ? Fonts.bodyBold : Fonts.bodyMedium,
                   color,
                 }}>

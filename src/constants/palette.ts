@@ -1,5 +1,5 @@
 /**
- * Paleta de marca WoFlip — "neo-brutalismo cálido" heredado de la web de
+ * Paleta de marca Woflip — "neo-brutalismo cálido" heredado de la web de
  * Woblip (papel crema + ink) con ancla lavanda propia (color del icono).
  * Módulo puro sin dependencias de react-native (importable desde src/lib).
  */
