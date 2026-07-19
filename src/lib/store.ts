@@ -1,6 +1,6 @@
 /**
  * Repositorio local: ÚNICO punto de acceso a datos de la app.
- * Envuelve expo-sqlite/kv-store (API síncrona) con caché en memoria y un
+ * Envuelve expo-sqlite/kv-store con caché en memoria y un
  * emisor de cambios para React (useSyncExternalStore). Sustituible por una
  * API real más adelante sin tocar pantallas.
  */
@@ -45,7 +45,12 @@ const KEY = {
 } as const;
 
 function defaultSettings(): Settings {
-  return { onboardingDone: false, requestsThisWeek: 0, requestsWeekOf: mondayOf(todayISO()) };
+  return {
+    onboardingDone: false,
+    themeMode: 'system',
+    requestsThisWeek: 0,
+    requestsWeekOf: mondayOf(todayISO()),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -81,13 +86,16 @@ export function getVersion(): number {
   return version;
 }
 
-function readJSON<T>(key: string): T | null {
-  const raw = Storage.getItemSync(key);
+async function readJSON<T>(key: string): Promise<T | null> {
+  const raw = await Storage.getItem(key);
   return raw == null ? null : (JSON.parse(raw) as T);
 }
 
+let persistenceQueue = Promise.resolve();
+
 function writeJSON(key: string, value: unknown): void {
-  Storage.setItemSync(key, JSON.stringify(value));
+  const serialized = JSON.stringify(value);
+  persistenceQueue = persistenceQueue.then(() => Storage.setItem(key, serialized));
 }
 
 function requireState(): State {
@@ -99,31 +107,50 @@ function requireState(): State {
 // Inicialización y seed
 // ---------------------------------------------------------------------------
 
-export function initStore(): void {
-  if (state) return;
-  const storedSeed = readJSON<number>(KEY.seedVersion);
-  if (storedSeed !== SEED_VERSION) {
-    seedAll();
-    return;
-  }
-  const members = readJSON<Member[]>(KEY.members) ?? buildSeedMembers();
-  const storedSettings = readJSON<Settings>(KEY.settings);
-  state = {
-    // requestsWeekOf puede faltar en datos v1 antiguos: el reset perezoso lo normaliza.
-    settings: storedSettings ? { ...defaultSettings(), ...storedSettings } : defaultSettings(),
-    shiftTypes: readJSON<ShiftType[]>(KEY.shiftTypes) ?? defaultShiftTypes(),
-    members,
-    group: readJSON<Group>(KEY.group) ?? buildSeedGroup(),
-    assignmentsByMember: Object.fromEntries(
-      members.map((m) => [
-        m.id,
-        readJSON<Record<ISODate, Assignment>>(KEY.assignments(m.id)) ?? {},
-      ]),
-    ),
-    offers: readJSON<SwapOffer[]>(KEY.offers) ?? [],
-    requests: readJSON<SwapRequest[]>(KEY.requests) ?? [],
-  };
-  notify();
+let initialization: Promise<void> | null = null;
+
+export function initStore(): Promise<void> {
+  if (state) return Promise.resolve();
+  if (initialization) return initialization;
+
+  initialization = (async () => {
+    const storedSeed = await readJSON<number>(KEY.seedVersion);
+    if (storedSeed !== SEED_VERSION) {
+      seedAll();
+      return;
+    }
+
+    const [storedMembers, storedSettings, shiftTypes, group, offers, requests] = await Promise.all([
+      readJSON<Member[]>(KEY.members),
+      readJSON<Settings>(KEY.settings),
+      readJSON<ShiftType[]>(KEY.shiftTypes),
+      readJSON<Group>(KEY.group),
+      readJSON<SwapOffer[]>(KEY.offers),
+      readJSON<SwapRequest[]>(KEY.requests),
+    ]);
+    const members = storedMembers ?? buildSeedMembers();
+    const assignments = await Promise.all(
+      members.map((member) => readJSON<Record<ISODate, Assignment>>(KEY.assignments(member.id))),
+    );
+
+    state = {
+      // requestsWeekOf puede faltar en datos v1 antiguos: el reset perezoso lo normaliza.
+      settings: storedSettings ? { ...defaultSettings(), ...storedSettings } : defaultSettings(),
+      shiftTypes: shiftTypes ?? defaultShiftTypes(),
+      members,
+      group: group ?? buildSeedGroup(),
+      assignmentsByMember: Object.fromEntries(
+        members.map((member, index) => [member.id, assignments[index] ?? {}]),
+      ),
+      offers: offers ?? [],
+      requests: requests ?? [],
+    };
+    notify();
+  })().finally(() => {
+    initialization = null;
+  });
+
+  return initialization;
 }
 
 function seedAll(): void {
@@ -162,12 +189,13 @@ function persistAll(): void {
 
 /** Borra todo y re-siembra (botón "Restablecer datos de demo"). */
 export function resetDemoData(): void {
-  // Resetear datos de demo no debe re-armar el onboarding en el próximo arranque.
+  // Resetear datos de demo no debe re-armar el onboarding ni cambiar el tema.
   const onboardingDone = state?.settings.onboardingDone ?? false;
-  Storage.clearSync();
+  const themeMode = state?.settings.themeMode ?? 'system';
+  persistenceQueue = persistenceQueue.then(() => Storage.clear());
   state = null;
   seedAll();
-  updateSettings({ onboardingDone });
+  updateSettings({ onboardingDone, themeMode });
 }
 
 // ---------------------------------------------------------------------------

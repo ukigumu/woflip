@@ -1,6 +1,6 @@
 import { BottomSheet, RNHostView } from '@expo/ui';
 import type { PropsWithChildren } from 'react';
-import { Platform, useWindowDimensions, View } from 'react-native';
+import { Modal, Platform, Pressable, useWindowDimensions, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -24,7 +24,48 @@ interface Props {
  */
 export function Sheet({ visible, onDismiss, children }: PropsWithChildren<Props>) {
   const colors = useTheme();
-  const { width } = useWindowDimensions();
+  const window = useWindowDimensions();
+  const useMobileFrame = Platform.OS === 'web' && window.width >= 526 && window.height >= 1028;
+
+  if (Platform.OS === 'web') {
+    const modalWidth = useMobileFrame ? 430 : window.width;
+    const modalHeight = useMobileFrame ? 932 : window.height;
+
+    return (
+      <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Cerrar diálogo"
+            onPress={onDismiss}
+            style={{
+              width: modalWidth,
+              height: modalHeight,
+              maxWidth: '100%',
+              maxHeight: '100%',
+              justifyContent: 'flex-end',
+              overflow: 'hidden',
+              borderRadius: useMobileFrame ? 48 : 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            }}>
+            <Pressable
+              onPress={(event) => event.stopPropagation()}
+              style={{
+                maxHeight: '82%',
+                paddingHorizontal: Spacing.four,
+                paddingTop: Spacing.three,
+                paddingBottom: useMobileFrame ? 34 : Spacing.four,
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                backgroundColor: colors.surface,
+              }}>
+              <View style={{ gap: Spacing.three }}>{children}</View>
+            </Pressable>
+          </Pressable>
+        </View>
+      </Modal>
+    );
+  }
 
   return (
     <BottomSheet
@@ -38,7 +79,7 @@ export function Sheet({ visible, onDismiss, children }: PropsWithChildren<Props>
             El sheet nativo mete 16 de padding a cada lado. */}
         <View
           style={{
-            width: width - 32,
+            width: window.width - 32,
             gap: Spacing.three,
             paddingHorizontal: Spacing.two,
             paddingTop: Spacing.two,

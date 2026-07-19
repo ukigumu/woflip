@@ -106,8 +106,12 @@ export interface SwapRequest {
   createdAt: string;
 }
 
+export type ThemeMode = 'system' | 'light' | 'dark';
+
 export interface Settings {
   onboardingDone: boolean;
+  /** Tema visual elegido por el usuario; 'system' sigue al del dispositivo. */
+  themeMode: ThemeMode;
   /** Contador anti-sondeo (límite blando por semana). */
   requestsThisWeek: number;
   /** Lunes (ISO) de la semana a la que pertenece el contador; al cambiar de semana se resetea. */

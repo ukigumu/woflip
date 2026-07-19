@@ -2,7 +2,7 @@ import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -35,6 +35,7 @@ import type { Assignment } from '@/lib/types';
  */
 export default function SemanaScreen() {
   useStoreVersion();
+  const window = useWindowDimensions();
   const colors = useTheme();
   const { monday, isCurrentWeek, prevWeek, nextWeek, goToCurrentWeek } = useWeek();
   const [editing, setEditing] = useState<Assignment | null>(null);
@@ -47,6 +48,7 @@ export default function SemanaScreen() {
   const days = weekDates(monday);
   const hours = weekHours(getAssignments(me.id, monday, addDaysISO(monday, 6)), typesById, monday);
   const daysFilled = days.filter((d) => getAssignment(me.id, d)).length;
+  const useMobileFrame = Platform.OS === 'web' && window.width >= 526 && window.height >= 1028;
 
   /** Tap: pasa al siguiente turno-tipo por sortOrder; tras el último, vacía. */
   function cycleDay(date: string) {
@@ -78,12 +80,19 @@ export default function SemanaScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        paddingTop: useMobileFrame ? 24 : 0,
+      }}
+      edges={['top']}>
       {/* Marca */}
       <View style={{ paddingHorizontal: Spacing.three, paddingTop: Spacing.one }}>
         <Image
           source={require('../../../assets/woflip-logo.svg')}
           contentFit="contain"
+          tintColor={colors.text}
           style={{ width: 90, height: 30 }}
         />
       </View>

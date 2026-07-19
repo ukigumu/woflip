@@ -1,8 +1,8 @@
 /**
  * Tokens de diseño de Woflip — lenguaje "neo-brutalista cálido":
  * papel crema, bordes ink de 1.5px, sombras duras sin blur y píldoras.
- * En dark la sombra dura flipa a lavanda profunda (como la web de Woblip
- * flipa a mint en sus cards oscuras).
+ * En dark la sombra dura desaparece (transparente): las cards van planas,
+ * definidas solo por su borde crema. El desplazamiento al pulsar se mantiene.
  */
 
 import { Palette } from './palette';
@@ -30,12 +30,14 @@ export const Colors = {
   dark: {
     text: '#F1EDE7',
     textSecondary: '#A8A49C',
-    background: '#1C1B19',
-    surface: '#262420',
-    backgroundElement: '#2A2925',
-    backgroundSelected: '#3A3247', // lavanda apagada sobre oscuro
+    // Fondo elevado un paso: deja aire para que la sombra negra lea como
+    // profundidad (una sombra dura necesita ser más oscura que su fondo).
+    background: '#2A2825',
+    surface: '#34312C',
+    backgroundElement: '#3A3731',
+    backgroundSelected: '#463F58', // lavanda apagada sobre oscuro
     border: '#F1EDE7',
-    shadow: Palette.primaryDeep,
+    shadow: 'transparent',
     accent: Palette.primary,
     accentDeep: Palette.primaryDeep,
     danger: '#E57368',

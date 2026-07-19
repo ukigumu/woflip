@@ -15,6 +15,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, {
@@ -33,6 +34,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayRow } from '@/components/day-row';
 import { ShiftTypeEditorSheet } from '@/components/shift-type-editor-sheet';
+import { ThemeModePicker } from '@/components/theme-mode-picker';
 import { Body, Caption, Heading, Hero, Title } from '@/components/ui/app-text';
 import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
@@ -54,13 +56,14 @@ import {
 } from '@/lib/store';
 import type { ShiftType } from '@/lib/types';
 
-const STEPS = ['name', 'privacy', 'explain', 'week'] as const;
+const STEPS = ['name', 'theme', 'privacy', 'explain', 'week'] as const;
 type Step = (typeof STEPS)[number];
 
 /**
- * Onboarding en tres pasos sobre una sola ruta:
- * 1) nombre (chapa "HOLA, ME LLAMO…"), 2) privacidad (dos tarjetas grandes),
- * 3) la semana real con las mismas DayRow de /semana, tap por día para ciclar.
+ * Onboarding por pasos sobre una sola ruta:
+ * 1) nombre (chapa "HOLA, ME LLAMO…"), 2) tema (claro/oscuro, se aplica al
+ * momento), 3) privacidad (dos tarjetas grandes),
+ * 4) la semana real con las mismas DayRow de /semana, tap por día para ciclar.
  * El borrador es estado local (cero escrituras por tap); "Crear mi semana"
  * lo persiste y hace la coreografía de salida hacia /semana, cuyas filas
  * ocupan las mismas posiciones (el "morph" es continuidad geométrica).
@@ -70,6 +73,14 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const colors = useTheme();
   const reduceMotion = useReducedMotion();
+  const window = useWindowDimensions();
+  const useMobileFrame = Platform.OS === 'web' && window.width >= 526 && window.height >= 1028;
+  const safeAreaStyle = {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingTop: useMobileFrame ? 24 : 0,
+    paddingBottom: useMobileFrame ? 34 : 0,
+  };
 
   const me = getMe();
   const days = weekDates(currentMonday());
@@ -91,7 +102,7 @@ export default function OnboardingScreen() {
   function submitName() {
     haptics.selection();
     if (name.trim()) updateMember(me.id, { name: name.trim() });
-    setStep('privacy');
+    setStep('theme');
   }
 
   function choosePrivacy(shareFullSchedule: boolean) {
@@ -146,9 +157,7 @@ export default function OnboardingScreen() {
 
   if (step === 'name') {
     return (
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: colors.background }}
-        edges={['top', 'bottom']}>
+      <SafeAreaView style={safeAreaStyle} edges={['top', 'bottom']}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1, paddingHorizontal: Spacing.four, paddingTop: Spacing.three }}>
@@ -190,14 +199,44 @@ export default function OnboardingScreen() {
     );
   }
 
-  if (step === 'privacy') {
+  if (step === 'theme') {
     return (
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: colors.background }}
-        edges={['top', 'bottom']}>
+      <SafeAreaView style={safeAreaStyle} edges={['top', 'bottom']}>
         <View style={{ flex: 1, paddingHorizontal: Spacing.four, paddingTop: Spacing.three }}>
           <Animated.View exiting={FadeOutUp.duration(180)} style={{ flex: 1 }}>
-            <Header step="privacy" onBack={() => setStep('name')} />
+            <Header step="theme" onBack={() => setStep('name')} />
+            <View style={{ flex: 1, paddingTop: Spacing.six, gap: Spacing.four }}>
+              <Animated.View entering={FadeInDown.springify(300)} style={{ gap: Spacing.two }}>
+                <Hero>¿Claro u oscuro?</Hero>
+                <Body color="secondary">
+                  Pruébalos: la app cambia al momento. Podrás cambiarlo cuando quieras en Ajustes.
+                </Body>
+              </Animated.View>
+
+              <Animated.View entering={FadeInDown.delay(140).springify(300)}>
+                <ThemeModePicker />
+              </Animated.View>
+            </View>
+            <PillButton
+              variant="primary"
+              label="Continuar"
+              onPress={() => {
+                haptics.selection();
+                setStep('privacy');
+              }}
+            />
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (step === 'privacy') {
+    return (
+      <SafeAreaView style={safeAreaStyle} edges={['top', 'bottom']}>
+        <View style={{ flex: 1, paddingHorizontal: Spacing.four, paddingTop: Spacing.three }}>
+          <Animated.View exiting={FadeOutUp.duration(180)} style={{ flex: 1 }}>
+            <Header step="privacy" onBack={() => setStep('theme')} />
             <View style={{ flex: 1, paddingTop: Spacing.six, gap: Spacing.three }}>
               <Animated.View entering={FadeInDown.springify(300)} style={{ gap: Spacing.two }}>
                 <Hero>¿Quién ve tu horario?</Hero>
@@ -252,9 +291,7 @@ export default function OnboardingScreen() {
 
   if (step === 'explain') {
     return (
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: colors.background }}
-        edges={['top', 'bottom']}>
+      <SafeAreaView style={safeAreaStyle} edges={['top', 'bottom']}>
         <View style={{ flex: 1, paddingHorizontal: Spacing.four, paddingTop: Spacing.three }}>
           <Animated.View exiting={FadeOutUp.duration(180)} style={{ flex: 1 }}>
             <Header step="explain" onBack={() => setStep('privacy')} />
@@ -298,7 +335,7 @@ export default function OnboardingScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'bottom']}>
+    <SafeAreaView style={safeAreaStyle} edges={['top', 'bottom']}>
       <View style={{ flex: 1, paddingHorizontal: Spacing.four, paddingTop: Spacing.three }}>
         <Animated.View entering={FadeIn} style={[{ gap: Spacing.three }, chromeTopStyle]}>
           <Header step="week" onBack={leaving ? undefined : () => setStep('explain')} />
@@ -366,6 +403,7 @@ function Header({ step, onBack }: { step: Step; onBack?: () => void }) {
         <Image
           source={require('../../assets/woflip-logo.svg')}
           contentFit="contain"
+          tintColor={colors.text}
           style={{ width: 96, height: 32 }}
         />
       </View>

@@ -73,6 +73,7 @@ export default function InicioScreen() {
         <Image
           source={require('../../../assets/woflip-logo.svg')}
           contentFit="contain"
+          tintColor={colors.text}
           style={{ width: 88, height: 30 }}
         />
         <View style={{ flex: 1 }} />
@@ -149,7 +150,9 @@ export default function InicioScreen() {
                         right: 0,
                         bottom: 0,
                         borderRadius: Radii.inner,
-                        backgroundColor: colors.shadow,
+                        // border, no shadow: en dark la sombra es transparente
+                        // y este marcador de "hoy" debe seguir viéndose.
+                        backgroundColor: colors.border,
                       }}
                     />
                   ) : null}

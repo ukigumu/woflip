@@ -21,17 +21,17 @@ vi.mock('expo-sqlite/kv-store', () => {
   return {
     __esModule: true,
     default: {
-      getItemSync: (key: string) => map.get(key) ?? null,
-      setItemSync: (key: string, value: string) => {
+      getItem: async (key: string) => map.get(key) ?? null,
+      setItem: async (key: string, value: string) => {
         map.set(key, value);
       },
-      clearSync: () => map.clear(),
+      clear: async () => map.clear(),
     },
   };
 });
 
-beforeEach(() => {
-  initStore();
+beforeEach(async () => {
+  await initStore();
   resetDemoData();
 });
 

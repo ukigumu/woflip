@@ -7,7 +7,7 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -49,6 +49,8 @@ interface Props {
 export function AppTabBar({ state, navigation }: Props) {
   const colors = useTheme();
   const insets = useSafeAreaInsets();
+  const window = useWindowDimensions();
+  const useMobileFrame = Platform.OS === 'web' && window.width >= 526 && window.height >= 1028;
   const [innerWidth, setInnerWidth] = useState(0);
   const count = state.routes.length;
   const itemWidth = count > 0 ? innerWidth / count : 0;
@@ -74,7 +76,7 @@ export function AppTabBar({ state, navigation }: Props) {
         position: 'absolute',
         left: 14,
         right: 14,
-        bottom: Math.max(insets.bottom, 12),
+        bottom: Math.max(insets.bottom, useMobileFrame ? 34 : 12),
         paddingRight: SHADOW,
         paddingBottom: SHADOW,
       }}>

@@ -4,17 +4,32 @@
  * Los componentes leen con los getters de lib/store tras suscribirse.
  */
 
-import { type PropsWithChildren, useState } from 'react';
+import { type PropsWithChildren, useEffect, useState } from 'react';
 import { useSyncExternalStore } from 'react';
 
 import { getVersion, initStore, subscribe } from '@/lib/store';
 
 export function StoreProvider({ children }: PropsWithChildren) {
-  // Inicialización síncrona en el primer render (kv-store es síncrono).
-  useState(() => {
-    initStore();
-    return true;
-  });
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+
+  useEffect(() => {
+    let active = true;
+    initStore().then(
+      () => {
+        if (active) setReady(true);
+      },
+      (reason: unknown) => {
+        if (active) setError(reason);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (error) throw error;
+  if (!ready) return null;
   return <>{children}</>;
 }
 

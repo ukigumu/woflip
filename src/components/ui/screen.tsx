@@ -10,7 +10,11 @@ import { useTheme } from '@/hooks/use-theme';
  * padding y aire inferior para la tab bar flotante. Sustituye a HostScreen
  * en el cuerpo de las pantallas (HostScreen queda para sheets @expo/ui).
  */
-export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?: boolean }>) {
+export function Screen({
+  children,
+  scroll = true,
+  gap = Spacing.three,
+}: PropsWithChildren<{ scroll?: boolean; gap?: number }>) {
   const colors = useTheme();
 
   return (
@@ -21,7 +25,7 @@ export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?:
           contentContainerStyle={{
             padding: Spacing.three,
             paddingBottom: BottomTabInset + Spacing.four,
-            gap: Spacing.three,
+            gap,
           }}>
           {children}
         </ScrollView>

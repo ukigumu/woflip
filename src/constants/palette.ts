@@ -6,7 +6,7 @@
 
 export const Palette = {
   primary: '#D7BDF6', // lavanda marca
-  primaryDeep: '#B392E8', // lavanda profunda: sombras duras en dark, acentos
+  primaryDeep: '#B392E8', // lavanda profunda: acentos
   paper: '#FAF9F5', // papel crema (como la web Woblip)
   ink: '#2E2E2E', // negro suave: texto, bordes y sombras duras
   sun: '#FFD983', // amarillo sol

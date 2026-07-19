@@ -1,20 +1,22 @@
-import { Host, Switch } from '@expo/ui';
-import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
+import { ArrowRight01Icon, SquareLock02Icon, UserGroupIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useState, type PropsWithChildren } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { ShiftTypeEditorSheet } from '@/components/shift-type-editor-sheet';
+import { ThemeModePicker } from '@/components/theme-mode-picker';
 import { Body, Caption, Heading, Title } from '@/components/ui/app-text';
 import { Avatar } from '@/components/ui/avatar';
 import { Field } from '@/components/ui/field';
 import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
 import { Screen } from '@/components/ui/screen';
-import { BorderWidth, Fonts } from '@/constants/theme';
+import { BorderWidth, Fonts, Spacing } from '@/constants/theme';
 import { useStoreVersion } from '@/hooks/use-store';
 import { useTheme } from '@/hooks/use-theme';
+import { haptics } from '@/lib/haptics';
 import { formatIntervals } from '@/lib/hours';
 import { getMe, getShiftTypes, resetDemoData, updateMember } from '@/lib/store';
 import type { ShiftType } from '@/lib/types';
@@ -22,6 +24,7 @@ import type { ShiftType } from '@/lib/types';
 /** Ajustes: nombre, foto de perfil, turnos-tipo, privacidad y datos de demo. */
 export default function AjustesScreen() {
   useStoreVersion();
+  const router = useRouter();
   const colors = useTheme();
   const me = getMe();
   const [editing, setEditing] = useState<ShiftType | null>(null);
@@ -37,8 +40,16 @@ export default function AjustesScreen() {
   }
 
   return (
-    <Screen>
-      <Title>Ajustes</Title>
+    <Screen gap={Spacing.four}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <PillButton
+          size="sm"
+          icon="arrow-left"
+          accessibilityLabel="Volver"
+          onPress={() => router.back()}
+        />
+        <Title>Ajustes</Title>
+      </View>
 
       <View style={{ alignItems: 'center', gap: 12 }}>
         <Avatar name={me.name} photoUri={me.photoUri} size={96} />
@@ -122,23 +133,88 @@ export default function AjustesScreen() {
         </HardCard>
       </View>
 
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: Spacing.two }}>
         <Heading>Privacidad</Heading>
-        <Host matchContents>
-          <Switch
-            value={me.shareFullSchedule}
-            onValueChange={(v) => updateMember(me.id, { shareFullSchedule: v })}
-            label="Mostrar mi horario completo al grupo"
-          />
-        </Host>
-        <Caption color="secondary">
-          Apagado, el grupo solo ve si trabajas o libras cada día. Es tu decisión, no la del grupo.
-        </Caption>
+        <Caption color="secondary">¿Quién ve tu horario? Es tu decisión, no la del grupo.</Caption>
+        <PrivacyCard
+          icon={UserGroupIcon}
+          title="Mi equipo"
+          selected={me.shareFullSchedule}
+          onPress={() => {
+            haptics.selection();
+            updateMember(me.id, { shareFullSchedule: true });
+          }}>
+          <Body color="secondary">Tus compañeros ven tus turnos y tus horas exactas.</Body>
+        </PrivacyCard>
+        <PrivacyCard
+          icon={SquareLock02Icon}
+          title="Solo yo"
+          selected={!me.shareFullSchedule}
+          onPress={() => {
+            haptics.selection();
+            updateMember(me.id, { shareFullSchedule: false });
+          }}>
+          <Body color="secondary">Nadie ve tus turnos ni tus horas.</Body>
+          <Caption color="secondary">
+            El emparejamiento ciego funciona igual: puedes pedir y ofrecer cambios sin enseñar tu
+            horario a nadie.
+          </Caption>
+        </PrivacyCard>
+      </View>
+
+      <View style={{ gap: Spacing.two }}>
+        <Heading>Tema</Heading>
+        <ThemeModePicker />
       </View>
 
       <PillButton variant="danger" label="Restablecer datos de demo" onPress={resetDemoData} />
 
       <ShiftTypeEditorSheet shiftType={editing} onDismiss={() => setEditing(null)} />
     </Screen>
+  );
+}
+
+/** Tarjeta de privacidad: mismo estilo que las del onboarding (paso 2). */
+function PrivacyCard({
+  icon,
+  title,
+  selected,
+  onPress,
+  children,
+}: PropsWithChildren<{
+  icon: typeof UserGroupIcon;
+  title: string;
+  selected: boolean;
+  onPress: () => void;
+}>) {
+  const colors = useTheme();
+  return (
+    <HardCard
+      onPress={onPress}
+      shadowOffset={4}
+      color={selected ? colors.backgroundSelected : undefined}
+      pressedColor={colors.backgroundSelected}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ selected }}
+      contentStyle={{ padding: Spacing.three, gap: Spacing.two }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            borderWidth: BorderWidth,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: colors.accent,
+            borderColor: colors.border,
+          }}>
+          <HugeiconsIcon icon={icon} size={20} color="#2E2E2E" strokeWidth={2} />
+        </View>
+        <Heading style={{ flex: 1 }}>{title}</Heading>
+      </View>
+      {children}
+    </HardCard>
   );
 }
