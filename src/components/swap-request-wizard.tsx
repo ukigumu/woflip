@@ -2,6 +2,8 @@ import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Pressable, Text, View } from 'react-native';
 
+import { DateTile } from '@/components/date-tile';
+import { TwoWeekGrid } from '@/components/two-week-grid';
 import { Body, Caption, Heading } from '@/components/ui/app-text';
 import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
@@ -9,7 +11,7 @@ import { useState } from 'react';
 
 import { Fonts, Radii } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { addDaysISO, formatDayLong, formatDayShort, todayISO } from '@/lib/dates';
+import { addDaysISO, formatDayLong, todayISO } from '@/lib/dates';
 import { effectiveIntervals, formatIntervals } from '@/lib/hours';
 import {
   computeCandidates,
@@ -45,7 +47,7 @@ export function SwapRequestWizard({ onSent }: { onSent: () => void }) {
 
   function describeShift(a: Assignment): string {
     const type = typesById[a.shiftTypeId];
-    return `${formatDayShort(a.date)} · ${type?.label ?? ''} (${formatIntervals(effectiveIntervals(a, typesById))})`;
+    return `${type?.label ?? ''} (${formatIntervals(effectiveIntervals(a, typesById))})`;
   }
 
   return (
@@ -55,31 +57,37 @@ export function SwapRequestWizard({ onSent }: { onSent: () => void }) {
       {step === 1 ? (
         <View style={{ gap: 8 }}>
           <Heading>¿Qué turno tuyo cedes?</Heading>
+          <Caption color="secondary">Toca un día con turno.</Caption>
+          <TwoWeekGrid
+            memberId={me.id}
+            selectedDate={shift?.date}
+            canSelect={(d, a, t) => d > today && !!a && t?.kind === 'work'}
+            onSelectDay={(_, a) => {
+              setShift(a);
+              setStep(2);
+            }}
+          />
           {myShifts.length === 0 ? (
             <Caption color="secondary">
               No tienes turnos en los próximos 14 días. Mete tu semana primero.
             </Caption>
-          ) : (
-            <HardCard shadowOffset={4} contentStyle={{ paddingVertical: 2 }}>
-              {myShifts.map((a, i) => (
-                <RowItem
-                  key={a.id}
-                  first={i === 0}
-                  title={describeShift(a)}
-                  onPress={() => {
-                    setShift(a);
-                    setStep(2);
-                  }}
-                />
-              ))}
-            </HardCard>
-          )}
+          ) : null}
         </View>
       ) : null}
 
       {step === 2 && shift ? (
         <View style={{ gap: 8 }}>
-          <Heading>{`Tu turno: ${describeShift(shift)}`}</Heading>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <DateTile size="sm" date={shift.date} shiftType={typesById[shift.shiftTypeId]} />
+            <View style={{ flex: 1 }}>
+              <Body style={{ fontFamily: Fonts.bodyBold }}>
+                {typesById[shift.shiftTypeId]?.label ?? ''}
+              </Body>
+              <Caption color="secondary">
+                {formatIntervals(effectiveIntervals(shift, typesById))}
+              </Caption>
+            </View>
+          </View>
           <Body>¿Qué quieres conseguir?</Body>
           <HardCard shadowOffset={4} contentStyle={{ paddingVertical: 2 }}>
             <RowItem
@@ -237,14 +245,23 @@ function ResultStep({
       <Caption color="secondary">
         No verás quiénes son: la propuesta es ciega y su identidad solo se revela si alguien acepta.
       </Caption>
-      <HardCard shadowOffset={4} contentStyle={{ padding: 14, gap: 4 }}>
+      <HardCard shadowOffset={4} contentStyle={{ padding: 14, gap: 8 }}>
         <Caption style={{ fontFamily: Fonts.bodyBold }}>Tu parte del cambio</Caption>
-        <Body>{`Cedes: ${describe}`}</Body>
-        <Body>
-          {mode === 'rest_day'
-            ? `Libras el ${formatDayLong(shift.date)} y trabajas un día que ahora libras`
-            : `Sigues trabajando el ${formatDayLong(shift.date)}, en otra franja`}
-        </Body>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <DateTile
+            size="sm"
+            date={shift.date}
+            shiftType={getShiftTypesById()[shift.shiftTypeId]}
+          />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Body>{`Cedes: ${describe}`}</Body>
+            <Body>
+              {mode === 'rest_day'
+                ? `Libras el ${formatDayLong(shift.date)} y trabajas un día que ahora libras`
+                : `Sigues trabajando el ${formatDayLong(shift.date)}, en otra franja`}
+            </Body>
+          </View>
+        </View>
       </HardCard>
       {softLimitReached ? (
         <Caption color={colors.danger}>

@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
+import { DateTile } from '@/components/date-tile';
 import { SwapRequestWizard } from '@/components/swap-request-wizard';
+import { TwoWeekGrid } from '@/components/two-week-grid';
+import { AppHeader } from '@/components/ui/app-header';
 import { Body, Caption, Heading, Title } from '@/components/ui/app-text';
 import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
@@ -12,7 +15,7 @@ import { Palette } from '@/constants/palette';
 import { Fonts } from '@/constants/theme';
 import { useStoreVersion } from '@/hooks/use-store';
 import { useTheme } from '@/hooks/use-theme';
-import { addDaysISO, formatDayShort, todayISO } from '@/lib/dates';
+import { addDaysISO, todayISO } from '@/lib/dates';
 import { effectiveIntervals, formatIntervals } from '@/lib/hours';
 import {
   cancelOffer,
@@ -27,7 +30,7 @@ import {
   simulateResponse,
   takeOffer,
 } from '@/lib/store';
-import type { SwapOffer, SwapRequest } from '@/lib/types';
+import type { Assignment, SwapRequest } from '@/lib/types';
 
 /** Cambios: ofertas broadcast (con nombre) + peticiones con matching ciego. */
 export default function CambiosScreen() {
@@ -36,7 +39,7 @@ export default function CambiosScreen() {
 
   return (
     <Screen>
-      <Title>Cambios</Title>
+      <AppHeader title="Cambios" />
       <Segmented
         options={[
           { value: 'offers', label: 'Ofertas' },
@@ -56,6 +59,7 @@ export default function CambiosScreen() {
 
 function OffersTab() {
   const [choosing, setChoosing] = useState(false);
+  const [selected, setSelected] = useState<Assignment | null>(null);
   const colors = useTheme();
   const me = getMe();
   const typesById = getShiftTypesById();
@@ -67,9 +71,9 @@ function OffersTab() {
     (a) => typesById[a.shiftTypeId]?.kind === 'work',
   );
 
-  function describeOffer(o: SwapOffer): string {
-    const type = typesById[o.shiftTypeId];
-    return `${formatDayShort(o.date)} · ${type?.label ?? ''}`;
+  function dismissSheet() {
+    setChoosing(false);
+    setSelected(null);
   }
 
   return (
@@ -90,11 +94,17 @@ function OffersTab() {
               key={o.id}
               shadowOffset={4}
               color={mine ? colors.backgroundSelected : undefined}
-              contentStyle={{ padding: 14, gap: 8 }}>
-              <Body style={{ fontFamily: Fonts.bodyBold }}>
-                {`${mine ? 'Tú ofreces' : `${memberNames[o.fromMemberId] ?? '¿?'} ofrece`} · ${describeOffer(o)}`}
-              </Body>
-              {o.note ? <Caption color="secondary">{o.note}</Caption> : null}
+              contentStyle={{ padding: 12, gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <DateTile date={o.date} shiftType={typesById[o.shiftTypeId]} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Body style={{ fontFamily: Fonts.bodyBold }}>
+                    {mine ? 'Tú ofreces' : `${memberNames[o.fromMemberId] ?? '¿?'} ofrece`}
+                  </Body>
+                  <Caption color="secondary">{typesById[o.shiftTypeId]?.label ?? ''}</Caption>
+                  {o.note ? <Caption color="secondary">{o.note}</Caption> : null}
+                </View>
+              </View>
               {o.status === 'open' ? (
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
                   {mine ? (
@@ -121,35 +131,44 @@ function OffersTab() {
       )}
 
       {/* Selector de turno propio a ofrecer */}
-      <Sheet visible={choosing} onDismiss={() => setChoosing(false)}>
+      <Sheet visible={choosing} onDismiss={dismissSheet}>
         <Heading>¿Qué turno ofreces?</Heading>
+        <Caption color="secondary">
+          Toca un día con turno. Los días de descanso o sin turno no se pueden ofrecer.
+        </Caption>
+        <TwoWeekGrid
+          memberId={me.id}
+          selectedDate={selected?.date}
+          canSelect={(d, a, t) => d > today && !!a && t?.kind === 'work'}
+          onSelectDay={(_, a) => setSelected(a)}
+        />
         {myShifts.length === 0 ? (
-          <Caption color="secondary">No tienes turnos próximos que ofrecer.</Caption>
-        ) : (
-          <HardCard shadowOffset={4} contentStyle={{ paddingVertical: 2 }}>
-            {myShifts.map((a, i) => (
-              <Pressable
-                key={a.id}
-                onPress={() => {
-                  createOffer(a.id);
-                  setChoosing(false);
-                }}
-                style={({ pressed }) => [
-                  {
-                    paddingHorizontal: 14,
-                    paddingVertical: 12,
-                    borderTopWidth: i === 0 ? 0 : 1,
-                    borderTopColor: colors.backgroundElement,
-                  },
-                  pressed && { backgroundColor: colors.backgroundElement },
-                ]}>
-                <Body style={{ fontFamily: Fonts.bodyMedium }}>
-                  {`${formatDayShort(a.date)} · ${typesById[a.shiftTypeId]?.label ?? ''} (${formatIntervals(effectiveIntervals(a, typesById))})`}
-                </Body>
-              </Pressable>
-            ))}
-          </HardCard>
-        )}
+          <Caption color="secondary">
+            No tienes turnos próximos que ofrecer. Mete tu semana primero.
+          </Caption>
+        ) : selected ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <DateTile date={selected.date} shiftType={typesById[selected.shiftTypeId]} />
+            <View style={{ flex: 1 }}>
+              <Body style={{ fontFamily: Fonts.bodyBold }}>
+                {typesById[selected.shiftTypeId]?.label ?? ''}
+              </Body>
+              <Caption color="secondary">
+                {formatIntervals(effectiveIntervals(selected, typesById))}
+              </Caption>
+            </View>
+          </View>
+        ) : null}
+        {selected ? (
+          <PillButton
+            variant="primary"
+            label="Ofrecer este turno"
+            onPress={() => {
+              createOffer(selected.id);
+              dismissSheet();
+            }}
+          />
+        ) : null}
       </Sheet>
     </View>
   );
@@ -212,15 +231,16 @@ function RequestTab() {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 10,
+                  gap: 12,
                   paddingHorizontal: 14,
-                  paddingVertical: 10,
+                  paddingVertical: 8,
                   borderTopWidth: i === 0 ? 0 : 1,
                   borderTopColor: colors.backgroundElement,
                 }}>
+                <DateTile size="sm" date={r.targetDate} />
                 <View style={{ flex: 1 }}>
                   <Body style={{ fontFamily: Fonts.bodyMedium }}>
-                    {`${formatDayShort(r.targetDate)} · ${r.mode === 'rest_day' ? 'librar' : 'cambiar franja'}`}
+                    {r.mode === 'rest_day' ? 'Librar' : 'Cambiar franja'}
                   </Body>
                   {r.status === 'accepted' && r.acceptedByMemberId ? (
                     <Caption color="secondary">

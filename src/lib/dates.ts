@@ -105,13 +105,17 @@ export function formatDayLong(iso: ISODate): string {
   return `${WEEKDAYS_LONG[weekdayIndex(iso)]} ${d.getDate()} de ${monthLong[month]}`;
 }
 
-/** '12–18 may' o '28 abr – 4 may' si la semana cruza de mes. */
-export function formatWeekRange(monday: ISODate): string {
-  const sunday = addDaysISO(monday, 6);
-  const a = parseISODate(monday);
-  const b = parseISODate(sunday);
+/** '12–18 may' o '28 abr – 4 may' si el rango cruza de mes. */
+export function formatRange(from: ISODate, to: ISODate): string {
+  const a = parseISODate(from);
+  const b = parseISODate(to);
   if (a.getMonth() === b.getMonth()) {
     return `${a.getDate()}–${b.getDate()} ${MONTHS_SHORT[a.getMonth()]}`;
   }
   return `${a.getDate()} ${MONTHS_SHORT[a.getMonth()]} – ${b.getDate()} ${MONTHS_SHORT[b.getMonth()]}`;
+}
+
+/** '12–18 may' o '28 abr – 4 may' si la semana cruza de mes. */
+export function formatWeekRange(monday: ISODate): string {
+  return formatRange(monday, addDaysISO(monday, 6));
 }

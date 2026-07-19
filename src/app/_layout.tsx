@@ -2,6 +2,7 @@ import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google
 import { Nunito_700Bold, Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
 import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import Head from 'expo-router/head';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
@@ -38,11 +39,16 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <StoreProvider>
-      <ThemeModeProvider>
-        <ThemedApp />
-      </ThemeModeProvider>
-    </StoreProvider>
+    <>
+      <Head>
+        <title>Woflip</title>
+      </Head>
+      <StoreProvider>
+        <ThemeModeProvider>
+          <ThemedApp />
+        </ThemeModeProvider>
+      </StoreProvider>
+    </>
   );
 }
 

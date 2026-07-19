@@ -2,6 +2,7 @@ import {
   addDaysISO,
   diffDays,
   formatDayShort,
+  formatRange,
   formatWeekRange,
   mondayOf,
   monthOf,
@@ -52,5 +53,10 @@ describe('dates', () => {
     expect(formatDayShort('2026-07-17')).toBe('vie 17');
     expect(formatWeekRange('2026-07-13')).toBe('13–19 jul');
     expect(formatWeekRange('2026-07-27')).toBe('27 jul – 2 ago'); // cruza mes
+  });
+
+  test('formatRange con rango arbitrario', () => {
+    expect(formatRange('2026-07-19', '2026-08-01')).toBe('19 jul – 1 ago'); // 14 días, cruza mes
+    expect(formatRange('2026-07-06', '2026-07-19')).toBe('6–19 jul'); // mismo mes
   });
 });

@@ -1,6 +1,5 @@
 import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -8,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayEditorSheet } from '@/components/day-editor-sheet';
 import { DayRow } from '@/components/day-row';
+import { AppHeader } from '@/components/ui/app-header';
 import { Caption, Title } from '@/components/ui/app-text';
 import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
@@ -89,12 +89,7 @@ export default function SemanaScreen() {
       edges={['top']}>
       {/* Marca */}
       <View style={{ paddingHorizontal: Spacing.three, paddingTop: Spacing.one }}>
-        <Image
-          source={require('../../../assets/woflip-logo.svg')}
-          contentFit="contain"
-          tintColor={colors.text}
-          style={{ width: 90, height: 30 }}
-        />
+        <AppHeader title="Mi semana" />
       </View>
 
       {/* Cabecera: navegación de semanas (tap en el título = volver a hoy) */}

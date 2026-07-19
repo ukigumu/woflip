@@ -1,9 +1,9 @@
 import { ArrowRight01Icon, Exchange01Icon, UserGroupIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
+import { AppHeader } from '@/components/ui/app-header';
 import { Body, Caption, Heading, Hero, Title } from '@/components/ui/app-text';
 import { Avatar } from '@/components/ui/avatar';
 import { HardCard } from '@/components/ui/hard-card';
@@ -69,16 +69,13 @@ export default function InicioScreen() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Image
-          source={require('../../../assets/woflip-logo.svg')}
-          contentFit="contain"
-          tintColor={colors.text}
-          style={{ width: 88, height: 30 }}
-        />
-        <View style={{ flex: 1 }} />
-        <Avatar name={me.name} initial="T" photoUri={me.photoUri} size={42} />
-      </View>
+      <AppHeader
+        right={
+          <Pressable onPress={() => router.push('/(tabs)/perfil')} hitSlop={8}>
+            <Avatar name={me.name} initial="T" photoUri={me.photoUri} size={42} />
+          </Pressable>
+        }
+      />
 
       <View style={{ gap: 3 }}>
         <Title>Hola, {me.name === 'Yo' ? '¿qué tal?' : me.name}</Title>

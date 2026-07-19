@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { AppHeader } from '@/components/ui/app-header';
 import { Body, Caption, Heading, Title } from '@/components/ui/app-text';
 import { Avatar } from '@/components/ui/avatar';
 import { HardCard } from '@/components/ui/hard-card';
@@ -63,6 +64,7 @@ export default function PerfilScreen() {
 
   return (
     <Screen>
+      <AppHeader title="Perfil" />
       <Animated.View
         entering={enter(0)}
         style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

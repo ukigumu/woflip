@@ -1,8 +1,16 @@
 import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
+import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Caption, Heading, Title } from '@/components/ui/app-text';
+import { MemberScheduleSheet } from '@/components/member-schedule-sheet';
+import {
+  type AnchorRect,
+  type TeamDayDetail,
+  TeamDayPopover,
+} from '@/components/team-day-popover';
+import { AppHeader } from '@/components/ui/app-header';
+import { Caption, Heading } from '@/components/ui/app-text';
 import { Avatar } from '@/components/ui/avatar';
 import { HardCard } from '@/components/ui/hard-card';
 import { PillButton } from '@/components/ui/pill-button';
@@ -22,6 +30,8 @@ export default function EquipoScreen() {
   useStoreVersion();
   const colors = useTheme();
   const { monday, isCurrentWeek, prevWeek, nextWeek, goToCurrentWeek } = useWeek();
+  const [scheduleMemberId, setScheduleMemberId] = useState<string | null>(null);
+  const [dayDetail, setDayDetail] = useState<TeamDayDetail | null>(null);
 
   const today = todayISO();
   const days = weekDates(monday);
@@ -35,7 +45,7 @@ export default function EquipoScreen() {
 
   return (
     <Screen>
-      <Title>Mi equipo</Title>
+      <AppHeader title="Mi equipo" />
 
       {/* Navegación de semanas (tap en el rango = volver a la actual) */}
       <View style={styles.nav}>
@@ -119,7 +129,15 @@ export default function EquipoScreen() {
               styles.gridRow,
               { borderTopWidth: 1, borderTopColor: colors.backgroundElement },
             ]}>
-            <View style={[styles.nameCol, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={row.isMe ? 'Ver tu horario' : `Ver horario de ${row.name}`}
+              onPress={() => setScheduleMemberId(row.memberId)}
+              style={({ pressed }) => [
+                styles.nameCol,
+                { flexDirection: 'row', alignItems: 'center', gap: 6 },
+                pressed && { transform: [{ translateX: 2 }, { translateY: 2 }] },
+              ]}>
               <Avatar
                 name={row.name}
                 initial={row.isMe ? 'T' : undefined}
@@ -131,10 +149,22 @@ export default function EquipoScreen() {
                 style={{ flex: 1, fontSize: 12, fontFamily: Fonts.bodyMedium, color: colors.text }}>
                 {row.isMe ? 'Tú' : row.name}
               </Text>
-            </View>
+            </Pressable>
             {row.cells.map((cell, i) => (
               <View key={days[i]} style={styles.cellSlot}>
-                <DayCell cell={cell} />
+                <DayCell
+                  cell={cell}
+                  onPress={(anchor) =>
+                    setDayDetail({
+                      memberId: row.memberId,
+                      name: row.name,
+                      isMe: row.isMe,
+                      date: days[i],
+                      cell,
+                      anchor,
+                    })
+                  }
+                />
               </View>
             ))}
           </View>
@@ -171,28 +201,55 @@ export default function EquipoScreen() {
           El turno exacto (M, T, P…) solo se ve si el compañero comparte su horario.
         </Caption>
       </View>
+
+      <MemberScheduleSheet memberId={scheduleMemberId} onDismiss={() => setScheduleMemberId(null)} />
+      <TeamDayPopover detail={dayDetail} onDismiss={() => setDayDetail(null)} />
     </Screen>
   );
 }
 
 /** Celda de un día: color+código si es visible, bloque sólido si es privado. */
-function DayCell({ cell }: { cell: TeamWeekCell }) {
+function DayCell({
+  cell,
+  onPress,
+}: {
+  cell: TeamWeekCell;
+  onPress?: (anchor: AnchorRect) => void;
+}) {
   const colors = useTheme();
+  const ref = useRef<View>(null);
   if (cell.state === 'unknown') {
     return (
       <View style={[styles.cell, { borderStyle: 'dashed', borderColor: colors.textSecondary }]} />
     );
   }
-  if (cell.state === 'work') {
-    // Sky: pegatina neutra que no coincide con ningún turno-tipo (M/T/P/L).
-    return (
+  const face =
+    cell.state === 'work' ? (
+      // Sky: pegatina neutra que no coincide con ningún turno-tipo (M/T/P/L).
       <View style={[styles.cell, { backgroundColor: Palette.sky, borderColor: colors.border }]} />
+    ) : (
+      <View style={[styles.cell, { backgroundColor: cell.color, borderColor: colors.border }]}>
+        <Text style={styles.cellCode}>{cell.code}</Text>
+      </View>
     );
-  }
+  if (!onPress) return face;
+  const label =
+    cell.state === 'work' ? 'trabaja' : cell.state === 'rest' ? 'libra' : `turno ${cell.code}`;
   return (
-    <View style={[styles.cell, { backgroundColor: cell.color, borderColor: colors.border }]}>
-      <Text style={styles.cellCode}>{cell.code}</Text>
-    </View>
+    <Pressable
+      ref={ref}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={() => {
+        // El popover se ancla a la celda: medimos su rect en ventana.
+        ref.current?.measureInWindow((x, y, width, height) => onPress({ x, y, width, height }));
+      }}
+      style={({ pressed }) => [
+        { width: '100%', alignItems: 'center' },
+        pressed && { transform: [{ translateX: 2 }, { translateY: 2 }] },
+      ]}>
+      {face}
+    </Pressable>
   );
 }
 
