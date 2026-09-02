@@ -4,6 +4,13 @@
 
 Expo / React Native. You enter **your own shifts**, share with teammates on your terms, and trade coverage via offers and blind swap matching. No clock-in, no chat, no HR admin - that lives in **Woblip**. Woflip is the worker-side tool (and a natural acquisition channel toward Woblip when a workplace later wants company features).
 
+<p align="center">
+  <img src="docs/screenshots/hoy.png" alt="Today: afternoon shift, week strip, and who is off" width="180" />
+  <img src="docs/screenshots/semana.png" alt="Your week of morning, afternoon, split, and rest shifts" width="180" />
+  <img src="docs/screenshots/equipo.png" alt="Team grid of who works and who is off" width="180" />
+  <img src="docs/screenshots/cambios.png" alt="Open shift offer from a teammate" width="180" />
+</p>
+
 ## Who it’s for
 
 - Waiters, cooks, floor staff, and other shift workers
